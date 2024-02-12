@@ -11,10 +11,14 @@ The user can create new drawing functions which correctly interact with the rest
 
 ## Roadmap
 
-*** Specification
-*** Build system 
-*** 
-***
+* Specification/design document
+* Boilerplate + simple input demo
+* Build system (ability to disable Lua; run in browser and natively)
+* Vertical slice: drawing boxes, polygons, and sprites
+* Complete C++ API
+* Complete Lua API
+* (Maybe) create JS bindings
+
 
 ## API Details
 
