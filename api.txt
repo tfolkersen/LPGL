@@ -1,0 +1,47 @@
+target: (RGBA buffer) || (index buffer) || (stencil buffer)
+
+stencil: (stencil buffer) || NULL
+stencilflip: boolean
+stenciloffset: x, y
+
+fillp: 64 bits
+cliprect: x1, y1, x2, y2, flip (boolean)
+
+spritesheet: (RGBA buffer) || (index buffer) || NULL
+spriteparams: width, height
+
+palette: (map from index -> RGBA) || NULL
+palettemap: (map from index -> index)
+palettemask: (map from index -> boolean)
+
+camera: x, y, angle, zoom
+screenshader: (screen shader effect)
+altcolor: (RGBA color) || (index color) <-- Default (0, 0, 0, 0) or -1
+    Used for fillp and shapes that have a second color. Default to clear/transparent
+borderwidth: (unsigned int)
+    Thickness of text outline and border [b] functions
+window: width, height, scale
+    Dimensions of internal framebuffer, and scaling factor of viewport
+
+
+drawopts is [c1, ang, sx, sy] or [r, g, b, a, ang, sx, sy]
+
+f -- float RGBA
+b -- border
+t -- texture <-- IMPORTANT
+
+[f]cls(COLOR)
+[f]pix(x, y, COLOR)
+[fb]rect(x1, y1, x2, y2, drawopts)
+[fb]circ(x, y, r, drawopts)
+[fb]oval(x, y, r1, r2, drawopts)
+[f(b)]line(x1, y1, x2, y2, w, drawopts)
+[f(b)]text(x, y, string, w, drawopts)
+[fbt]poly(N, coord + color/UV groups) <-- this is harder
+
+------------------------------TODO------------------------------
+How to do input?
+
+------------------------------Possible future stuff------------------------------
+font: "spritesheet" used for text rendering
+camera manipulation functions similar to matrix multiplications
