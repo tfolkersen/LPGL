@@ -3,9 +3,15 @@ target: (RGBA buffer) || (index buffer) || (stencil buffer)
 stencil: (stencil buffer) || NULL
 stencilflip: boolean
 stenciloffset: x, y
+stencilorigin: SCREEN || WORLD
 
 fillp: 64 bits
+fillpoffset: x, y
+fillporigin: SCREEN || WORLD
+        <-------------------------- This is super jank, the offset and origin might interact strangely
+
 cliprect: x1, y1, x2, y2, flip (boolean)
+cliprectorigin: SCREEN || WORLD
 
 spritesheet: (RGBA buffer) || (index buffer) || NULL
 spriteparams: width, height
@@ -30,14 +36,29 @@ f -- float RGBA
 b -- border
 t -- texture <-- IMPORTANT
 
-[f]cls(COLOR)
-[f]pix(x, y, COLOR)
-[fb]rect(x1, y1, x2, y2, drawopts)
-[fb]circ(x, y, r, drawopts)
-[fb]oval(x, y, r1, r2, drawopts)
-[f(b)]line(x1, y1, x2, y2, w, drawopts)
-[f(b)]text(x, y, string, w, drawopts)
+[ft]cls(COLOR)
+~~~ [f]pix(x, y, COLOR) ~~~ <--- Don't do this
+[fbt]rect(x1, y1, x2, y2, drawopts)
+[fbt]circ(x, y, r, drawopts)
+[fbt]oval(x, y, r1, r2, drawopts)
+[fbt]line(x1, y1, x2, y2, w, drawopts)
+[fbt]text(x, y, string, w, drawopts)
 [fbt]poly(N, coord + color/UV groups) <-- this is harder
+
+
+poly was only [fbt]
+
+[t] (circ, oval, text) are weird
+
+
+getBufferType(bufferID) --> BUFFER_RGBA || BUFFER_INDEX || BUFFER_STENCIL
+
+[f]pget(bufferID, x, y)
+[f]pset(bufferID, x, y, COLOR)
+flushBuffer(bufferID)
+
+pget will load chunk from buffer into memory, but not set the dirty bit
+pset will load cuhnk from buffer into memory, modify the chunk, and set the dirty bit
 
 ------------------------------TODO------------------------------
 How to do input?
