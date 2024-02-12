@@ -1,10 +1,20 @@
 # LPGL (Lua Palette Graphics Library)
-A graphics API inspired by PICO-8 and TIC-80, for making games in Lua and C++. Runs both natively and in a web browser
+A graphics API inspired by PICO-8 and TIC-80, for making games in Lua and/or C++. Runs both natively and in a web browser
 
-## Motivation
+## Goals
+#### Simplicity
+LPGL is easy to use, and doesn't require the usual boilerplate code characteristic of writing OpenGL applications. Get started immediately by drawing shapes to the screen using simple functions
+#### Generality
+LPGL is free of artificial limitations imposed by many fantasy consoles, such as fixed size palettes with fixed colors, fixed resolutions, or limits on the size of a user's application; no need to minify your code! Draw either with RGBA colors, or with palette indices, or a mix of both. The ability to draw to either stencil buffers or color buffers makes it simple to implement lighting, layers, and other visual effects. You can make a modern game, or a retro style game
+#### Extendibility
+The user can create new drawing functions which correctly interact with the rest of the API, with relative ease
 
 ## Roadmap
 
+*** Specification
+*** Build system 
+*** 
+***
 
 ## API Details
 
@@ -44,6 +54,9 @@ Converts index buffer values to RGBA values
 
 ##### palettemap: (map from index -> index)
 Mutates index buffer values (can be used to shift colors, i.e. fade-in/fade-out screen effect)
+
+##### palettemask (map from index -> boolean)
+Defines transparency for palette indices
 
 ---
 
