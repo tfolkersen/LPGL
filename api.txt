@@ -7,7 +7,7 @@ stencilorigin: SCREEN || WORLD
 
 fillp: 64 bits
 fillpoffset: x, y
-fillporigin: SCREEN || WORLD
+fillporigin: SCREEN || WORLD || OBJECT (???)
         <-------------------------- This is super jank, the offset and origin might interact strangely
 
 cliprect: x1, y1, x2, y2, flip (boolean)
