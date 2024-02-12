@@ -3,7 +3,7 @@ A graphics API inspired by PICO-8 and TIC-80, for making games in Lua and/or C++
 
 ## Goals
 #### Simplicity
-LPGL is easy to use, and doesn't require the usual boilerplate code characteristic of writing OpenGL applications. Get started immediately by drawing shapes to the screen using simple functions
+LPGL is easy to use, and doesn't require the usual boilerplate code characteristic of writing OpenGL applications. Get started immediately by drawing shapes to the screen using simple functions!
 #### Generality
 LPGL is free of artificial limitations imposed by many fantasy consoles, such as fixed size palettes with fixed colors, fixed resolutions, or limits on the size of a user's application; no need to minify your code! Draw either with RGBA colors, or with palette indices, or a mix of both. The ability to draw to either stencil buffers or color buffers makes it simple to implement lighting, layers, and other visual effects. You can make a modern game, or a retro style game
 #### Extendibility
@@ -15,9 +15,12 @@ The user can create new drawing functions which correctly interact with the rest
 * Boilerplate + simple input demo
 * Build system (ability to disable Lua; run in browser and natively)
 * Vertical slice: drawing boxes, polygons, and sprites
-* Complete C++ API
-* Complete Lua API
-* (Maybe) create JS bindings
+* C++ graphics API
+* Implement audio
+* Complete Lua API (graphics + audio)
+* (Maybe) make JS bindings
+* (Maybe) make tools (sound editor, sprite editor, code editor, music editor)
+* (Maybe in the future) add 3D drawing functions
 
 
 ## API Details
