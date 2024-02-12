@@ -5,6 +5,7 @@ A graphics API inspired by PICO-8 and TIC-80, for making games in Lua and C++. R
 
 ## Roadmap
 
+
 ## API Details
 
 ### Global state variables
@@ -47,7 +48,7 @@ Mutates index buffer values (can be used to shift colors, i.e. fade-in/fade-out 
 ---
 
 ##### camera: x, y, angle, zoom
-Offsets drawing functions. Used 
+Offsets drawing functions
 
 ##### screenshader: (screen shader effect)
 Post processing shader used when drawing the internal framebuffer to the screen. Can be used for scanline effect
