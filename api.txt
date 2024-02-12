@@ -58,7 +58,7 @@ getBufferType(bufferID) --> BUFFER_RGBA || BUFFER_INDEX || BUFFER_STENCIL
 flushBuffer(bufferID)
 
 pget will load chunk from buffer into memory, but not set the dirty bit
-pset will load cuhnk from buffer into memory, modify the chunk, and set the dirty bit
+pset will load chunk from buffer into memory, modify the chunk, and set the dirty bit
 
 ------------------------------TODO------------------------------
 How to do input?
