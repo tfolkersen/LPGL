@@ -47,6 +47,11 @@ t -- texture <-- IMPORTANT
 
 
 poly was only [fbt]
+poly should create a buffer object so that future calls are faster, like a "create shape" function, but this is future work -- this draw function should take some kind of shape literal every time
+can optimize poly by using vertex shader properly, or can use the vertex shader to render one triangle for multiple overlapping minimal bounding boxes
+maybe have tri function?
+poly should call rect, line, or tri when appropriate
+
 
 [t] (circ, oval, text) are weird
 
