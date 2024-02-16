@@ -3,12 +3,15 @@ target: (RGBA buffer) || (index buffer) || (stencil buffer)
 stencil: (stencil buffer) || NULL
 stencilflip: boolean
 stenciloffset: x, y
-stencilorigin: SCREEN || WORLD
+stencilorigin: SCREEN || WORLD || OBJECT
+stencilwrap: NONE || SCALE || WRAP
 
 fillp: 64 bits
 fillpoffset: x, y
 fillporigin: SCREEN || WORLD || OBJECT (???)
         <-------------------------- This is super jank, the offset and origin might interact strangely
+
+instead of "origins" these might be coordinate spaces (i.e. stencil OBJECT + SCALE)
 
 cliprect: x1, y1, x2, y2, flip (boolean)
 cliprectorigin: SCREEN || WORLD
