@@ -68,6 +68,6 @@ compdb:
 	bear -- make libtest
 
 clean:
-	-rm -rf libtest
+	-rm -rf libtest cubetest
 
 cleanall: cleandeps clean
