@@ -1,4 +1,4 @@
-.PHONY: deps clean libtest cleanall
+.PHONY: deps clean libtest cleanall compdb
 
 MAKETHREADS := 11
 CXX := g++
@@ -56,6 +56,9 @@ cleandeps:
 	-make -C $(GLMDIR)/glm clean
 	-make -C $(LUADIR) clean
 	-rm -rf $(GLFWDIR)/build $(GLMDIR)/glm/build
+
+compdb:
+	bear -- make libtest
 
 clean:
 	-rm -rf libtest
