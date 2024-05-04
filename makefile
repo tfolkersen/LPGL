@@ -29,7 +29,7 @@ CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS)
 
 SRC:= src
 
-libtest: deps
+libtest:
 	-rm libtest
 	clear
 	$(CXX) $(SRC)/libtest.cpp -o libtest $(CPPFLAGS)

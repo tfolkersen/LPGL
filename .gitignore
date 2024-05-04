@@ -1,2 +1,4 @@
 libs/*
 libtest
+compile_commands.json
+.cache
