@@ -58,6 +58,7 @@ cleandeps:
 	-rm -rf $(GLFWDIR)/build $(GLMDIR)/glm/build
 
 compdb:
+	-rm compile_commands.json
 	bear -- make libtest
 
 clean:
