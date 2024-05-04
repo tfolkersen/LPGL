@@ -1,4 +1,4 @@
-.PHONY: deps clean libtest cleanall compdb
+.PHONY: deps clean libtest cleanall compdb cubetest
 
 MAKETHREADS := 11
 CXX := g++
@@ -25,9 +25,15 @@ LLUA :=
 IFLAGS := $(IGLEW) $(IGLFW) $(IGLM)
 LFLAGS := $(LGLEW) $(LGLFW) $(LGLM)
 
-CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS)
+CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS) -lGL
 
 SRC:= src
+
+cubetest:
+	-rm cubetest
+	clear
+	$(CXX) $(SRC)/cubetest.cpp -o cubetest $(CPPFLAGS)
+	./cubetest
 
 libtest:
 	-rm libtest
