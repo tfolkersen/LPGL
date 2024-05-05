@@ -540,7 +540,7 @@ int main() {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1i(u_Tex, 0);
+    glUniform1i(u_Tex, GL_TEXTURE0);
 
     GLint a_Pos = program["a_Pos"];
     GLint a_Color = program["a_Color"];
@@ -562,6 +562,7 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(a_Pos);
     glDisableVertexAttribArray(a_Color);
+    //glBindTexture(GL_TEXTURE_2D, 0);
 
     //set up drawing
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
