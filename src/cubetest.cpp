@@ -408,15 +408,7 @@ void animate() {
 
     pos += truncMotion * moveSpeed;
 
-
-    //for (int i = 0; i < 3; i++) {
-    //    cout << truncMotion[i] << " ";
-    //}
-    //cout << endl;
-
     matView = glm::lookAt(pos, pos + truncForward, glm::vec3(0.0f, 1.0f, 0.0f));
-
-    cout << angUp << " " << angLeft << endl;
 
     glUniformMatrix4fv(u_Model, 1, GL_FALSE, &matModel[0][0]);
     glUniformMatrix4fv(u_View, 1, GL_FALSE, &matView[0][0]);

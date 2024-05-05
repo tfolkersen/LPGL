@@ -1,4 +1,4 @@
-.PHONY: deps clean libtest cleanall compdb cubetest
+.PHONY: deps clean libtest cleanall compdb run
 
 MAKETHREADS := 11
 CXX := g++
@@ -33,15 +33,17 @@ CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS) -lGL
 
 SRC:= src
 
+run: cubetest
+	./cubetest
 
 %.o: %.cpp %.h
 	$(CXX) $< -o $@ $(CPPFLAGS) -c
 
-cubetest: $(SRC)/stb_image.o
-	-rm cubetest
-	clear
-	$(CXX) $(SRC)/cubetest.cpp $^ -o cubetest $(CPPFLAGS)
-	./cubetest
+%.o: %.cpp
+	$(CXX) $< -o $@ $(CPPFLAGS) -c
+
+cubetest: $(SRC)/cubetest.cpp $(SRC)/stb_image.o
+	$(CXX) $^ -o cubetest $(CPPFLAGS)
 
 libtest:
 	-rm libtest
