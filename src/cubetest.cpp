@@ -1,39 +1,220 @@
 #include <cstdio>
 #include <iostream>
 
+#include <vector>
+
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 using namespace std;
 
-GLFWwindow *window = NULL;
-
+//////////////////////////////////////////////////////////// UTILS
 string readFile(const string &fileName) {
-    string strData;
+    string fileData;
 
     FILE *f = fopen(fileName.c_str(), "r");
 
     if (f == NULL) {
-        cerr << "readFile failed to read " << fileName << endl;
-        return "";
+        cerr << "Failed to open file: " << fileName << endl;
+        return fileData;
     }
 
     fseek(f, 0, SEEK_END);
-    long size = ftell(f);
+    long fileSize = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    char *data = new char[size + 1];
-    data[size] = 0;
+    fileData.resize(fileSize);
 
-    fread(data, 1, size, f);
+    fread(fileData.data(), 1, fileSize, f);
 
-    strData = data;
-
-    delete[] data;
     fclose(f);
-    return strData;
+
+    return fileData;
 }
+
+//////////////////////////////////////////////////////////// SHADERS
+enum SHADERSTATUS {
+    SHADER_ERROR = -1,
+    SHADER_DELETED = 0,
+    SHADER_OK = 1,
+};
+
+struct Shader {
+    GLuint id;
+    GLenum type;
+    int status;
+    std::string statusLog;
+
+    Shader(const std::string &shaderCode, GLenum type);
+    void cleanup();
+};
+
+Shader::Shader(const string &shaderCode, GLenum type) {
+    id = 0;
+    this->type = type;
+
+    id = glCreateShader(type);
+
+    if (id == 0) {
+        statusLog = "Failed call to glCreateShader()";
+        status = SHADER_ERROR;
+        cerr << statusLog << endl;
+        return;
+    }
+
+    const char *sourcePtr = shaderCode.c_str();
+
+    glShaderSource(id, 1, &sourcePtr, NULL);
+
+    glCompileShader(id);
+
+    GLint compileStatus;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &compileStatus);
+
+    if (compileStatus == GL_TRUE) {
+        status = SHADER_OK;
+        statusLog = "Success";
+    } else {
+        status = SHADER_ERROR;
+
+        GLint logSize;
+
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logSize);
+        statusLog.resize(logSize - 1);
+
+        glGetShaderInfoLog(id, statusLog.size() + 1, NULL, statusLog.data());
+
+        cerr << "Failed call to glCompileShader(): " << statusLog << endl;
+
+        glDeleteShader(id);
+        id = 0;
+    }
+}
+
+void Shader::cleanup() {
+    if (status == SHADER_OK) {
+        glDeleteShader(id);
+    }
+
+    status = SHADER_DELETED;
+    id = 0;
+}
+
+struct ShaderProgram {
+    GLuint id;
+    int status;
+    std::string statusLog;
+
+    ShaderProgram(const Shader &vshader, const Shader &fshader);
+    ShaderProgram(const std::string &vshaderSource, const std::string &fshaderSource);
+    void cleanup();
+
+  private:
+    void compile(const Shader &vshader, const Shader &fshader);
+
+};
+
+void ShaderProgram::compile(const Shader &vshader, const Shader &fshader) {
+    if (vshader.type != GL_VERTEX_SHADER) {
+        cerr << "Warning: ShaderProgram() vshader parameter is of type " << vshader.type << endl;
+    }
+
+    if (fshader.type != GL_FRAGMENT_SHADER) {
+        cerr << "Warning: ShaderProgram() fshader parameter is of type " << fshader.type << endl;
+    }
+
+    bool err = false;
+
+    if (vshader.status != SHADER_OK) {
+        cerr << "Error: ShaderProgram() vshader parameter status is " << vshader.status << endl;
+        err = true;
+    }
+
+    if (fshader.status != SHADER_OK) {
+        cerr << "Error: ShaderProgram() fshader parameter status is " << fshader.status << endl;
+        err = true;
+    }
+
+    if (err) {
+        status = SHADER_ERROR;
+        statusLog = "vshader/fshader status not SHADER_OK";
+        id = 0;
+        return;
+    }
+
+    id = glCreateProgram();
+
+    if (id == 0) {
+        status = SHADER_ERROR;
+        statusLog = "Failed call to glCreateProgram()";
+        cerr << statusLog << endl;
+        return;
+    }
+
+    glAttachShader(id, vshader.id);
+    glAttachShader(id, fshader.id);
+    glLinkProgram(id);
+
+    GLint linkStatus;
+    glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
+
+    if (linkStatus == GL_TRUE) {
+        status = SHADER_OK;
+        statusLog = "Success";
+    } else {
+        status = SHADER_ERROR;
+
+        GLint logSize;
+
+        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logSize);
+
+        statusLog.resize(logSize - 1);
+
+        glGetProgramInfoLog(id, statusLog.size() + 1, NULL, statusLog.data());
+
+        cerr << "Failed call to glLinkProgram(): " << statusLog << endl;
+
+        glDeleteProgram(id);
+        id = 0;
+    }
+}
+
+
+ShaderProgram::ShaderProgram(const Shader &vshader, const Shader &fshader) {
+    compile(vshader, fshader);
+}
+
+
+ShaderProgram::ShaderProgram(const string &vshaderSource, const string &fshaderSource) {
+    Shader vshader(vshaderSource, GL_VERTEX_SHADER);
+    Shader fshader(fshaderSource, GL_FRAGMENT_SHADER);
+
+    compile(vshader, fshader);
+
+    vshader.cleanup();
+    fshader.cleanup();
+}
+
+void ShaderProgram::cleanup() {
+    if (status == SHADER_OK) {
+        glDeleteProgram(id);
+    }
+
+    id = 0;
+    status = SHADER_DELETED;
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+
+
+GLFWwindow *window = NULL;
+
+
 
 int main() {
     //init GLFW
@@ -44,13 +225,12 @@ int main() {
 
     //make window
     glfwWindowHint(GLFW_SAMPLES, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(1024, 768, "cubetest", NULL, NULL);
-
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
@@ -61,152 +241,59 @@ int main() {
         return -1;
     }
 
-    //compile shaders
-    GLint vsCompileStatus;
-
-    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-
-    string vshaderSource = readFile("shaders/cubetest.vshader");
-    const char *vshaderStrPtr = vshaderSource.c_str();
-
-    glShaderSource(vshader, 1, &vshaderStrPtr, NULL);
-    glCompileShader(vshader);
-
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &vsCompileStatus);
-
-    if (vsCompileStatus == GL_TRUE) {
-        cerr << "Compiled vshader" << endl;
-    } else {
-        cerr << "Failed to compile vshader:" << endl;
-
-        int infoLogLength;
-        glGetShaderiv(vshader, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-        char *log = new char[infoLogLength];
-
-        glGetShaderInfoLog(vshader, infoLogLength, NULL, log);
-
-        cerr << log << endl;
-
-        delete[] log;
-    }
-
-    GLint fsCompileStatus;
-
-    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    string fshaderSource = readFile("shaders/cubetest.fshader");
-    const char *fshaderStrPtr = fshaderSource.c_str();
-
-    glShaderSource(fshader, 1, &fshaderStrPtr, NULL);
-    glCompileShader(fshader);
-
-    glGetShaderiv(fshader, GL_COMPILE_STATUS, &fsCompileStatus);
-
-    if (fsCompileStatus == GL_TRUE) {
-        cerr << "Compiled fshader" << endl;
-    } else {
-        cerr << "Failed to compile fshader:" << endl;
-
-        GLint infoLogLength;
-        glGetShaderiv(fshader, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-        char *log = new char[infoLogLength];
-
-        glGetShaderInfoLog(fshader, infoLogLength, NULL, log);
-
-        cerr << log << endl;
-
-        delete[] log;
-    }
-
-    //create and link shader program, clean up
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vshader);
-    glAttachShader(program, fshader);
-    glLinkProgram(program);
-
-    GLint linkStatus;
-    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-
-    if (linkStatus == GL_TRUE) {
-        cerr << "Program linked successfully" << endl;
-    } else {
-        cerr << "Failed to link program:" << endl;
-
-        GLint infoLogLength;
-
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-        char *log = new char[infoLogLength];
-
-        glGetProgramInfoLog(program, infoLogLength, NULL, log);
-
-        cout << log << endl;
-
-        delete[] log;
-    }
-
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-
     //buffer data
     GLfloat vertexData[] = {
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 1.0f,
+        0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
     };
 
-    
+    GLuint vbuffer;
+    glGenBuffers(1, &vbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //set up shader program
+    string vshaderCode = readFile("shaders/cubetest.vshader");
+    string fshaderCode = readFile("shaders/cubetest.fshader");
+
+    Shader vshader(vshaderCode, GL_VERTEX_SHADER);
+    Shader fshader(fshaderCode, GL_FRAGMENT_SHADER);
+
+    ShaderProgram program(vshader, fshader);
+
+    vshader.cleanup();
+    fshader.cleanup();
+
+    cout << "ShaderProgram status: " << program.status << endl;
+
+    //set up VAO
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    GLuint buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
 
-    //Enable attributes
-    int a_Pos = glGetAttribLocation(program, "a_Pos");
-
-    if (a_Pos == -1) {
-        cerr << "Failed to find a_Pos location" << endl;
-    }
-
-    int a_Color = glGetAttribLocation(program, "a_Color");
-
-    if (a_Pos == -1) {
-        cerr << "Failed to find a_Color location" << endl;
-    }
-
-
-    glEnableVertexAttribArray(a_Pos);
-    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), 0);
-
-    glEnableVertexAttribArray(a_Color);
-    glVertexAttribPointer(a_Color, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), (int *) (3 * sizeof(GLfloat)));
+    
 
 
 
     //set up drawing
-    glClearColor(0.3f, 0.15f, 0.0f, 1.0f);
-    glUseProgram(program);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     //draw loop
     do {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     } while (glfwWindowShouldClose(window) != GLFW_TRUE && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
 
-
-
-
     //clean up
+
+
     glfwTerminate();
     return 0;
 }
