@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <vector>
+#include <unordered_map>
 
 
 #include <GL/glew.h>
@@ -111,8 +112,20 @@ struct ShaderProgram {
     ShaderProgram(const std::string &vshaderSource, const std::string &fshaderSource);
     void cleanup();
 
+    void findAttribute(const std::string &name);
+    void findUniform(const std::string &name);
+
+    void findAttributes(const std::vector<std::string> &names);
+    void findUniforms(const std::vector<std::string> &names);
+
+    GLint operator[](const std::string &name);
+
+
   private:
     void compile(const Shader &vshader, const Shader &fshader);
+    //std::unordered_map<const char *, GLint> locationMap;
+    std::unordered_map<std::string, GLint> locationMap;
+
 
 };
 
@@ -197,6 +210,7 @@ ShaderProgram::ShaderProgram(const string &vshaderSource, const string &fshaderS
     fshader.cleanup();
 }
 
+
 void ShaderProgram::cleanup() {
     if (status == SHADER_OK) {
         glDeleteProgram(id);
@@ -204,7 +218,66 @@ void ShaderProgram::cleanup() {
 
     id = 0;
     status = SHADER_DELETED;
+
+    locationMap.clear();
 }
+
+
+void ShaderProgram::findAttribute(const string &name) {
+    if (status != SHADER_OK) {
+        return;
+    }
+
+    GLint location = glGetAttribLocation(id, name.c_str());
+
+    if (location == -1) {
+        cerr << "ShaderProgram failed to find attribute \"" << name << "\"" << endl;
+        return;
+    } else {
+        locationMap[name] = location;
+    }
+}
+
+void ShaderProgram::findUniform(const string &name) {
+    if (status != SHADER_OK) {
+        return;
+    }
+
+    GLint location = glGetUniformLocation(id, name.c_str());
+
+    if (location == -1) {
+        cerr << "ShaderProgram failed to find uniform \"" << name << "\"" << endl;
+        return;
+    } else {
+        locationMap[name] = location;
+    }
+}
+
+
+void ShaderProgram::findAttributes(const vector<string> &names) {
+    for (const string &name : names) {
+        findAttribute(name);
+    }
+}
+
+void ShaderProgram::findUniforms(const vector<string> &names) {
+    for (const string &name : names) {
+        findUniform(name);
+    }
+}
+
+
+
+GLint ShaderProgram::operator[](const std::string &name) {
+    auto it = locationMap.find(name);
+
+    if (it == locationMap.end()) {
+        return -1;
+    }
+
+    return it->second;
+}
+
 
 
 
@@ -213,7 +286,6 @@ void ShaderProgram::cleanup() {
 
 
 GLFWwindow *window = NULL;
-
 
 
 int main() {
@@ -262,9 +334,12 @@ int main() {
     Shader fshader(fshaderCode, GL_FRAGMENT_SHADER);
 
     ShaderProgram program(vshader, fshader);
+    program.findAttributes({"a_Pos", "a_Color"});
 
     vshader.cleanup();
     fshader.cleanup();
+
+    cout << "Locations: " << program["a_Pos"] << " " << program["a_Color"] << " " << program["asd"] << endl;
 
     cout << "ShaderProgram status: " << program.status << endl;
 
