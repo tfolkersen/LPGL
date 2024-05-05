@@ -1,4 +1,13 @@
 #include <cstdio>
+#include <cstdlib>
+
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/geometric.hpp>
+#include <glm/trigonometric.hpp>
+
+
 #include <iostream>
 
 #include <vector>
@@ -7,7 +16,9 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
 
@@ -288,6 +299,142 @@ GLint ShaderProgram::operator[](const std::string &name) {
 GLFWwindow *window = NULL;
 
 
+GLint u_Model, u_View, u_Projection;
+
+
+
+template <class T>
+T clamp(const T &x, const T &low, const T &high) {
+    if (x < low) {
+        return low;
+    }
+
+    if (x > high) {
+        return high;
+    }
+
+    return x;
+}
+
+uint64_t frameNumber = 0;
+
+GLfloat boxX = 0.0f;
+GLfloat boxSpeed = 0.01f;
+GLfloat direction = 1.0f;
+
+
+glm::mat4 matProjection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+
+GLfloat angLeft = 0.0f;
+GLfloat angUp = 0.0f;
+glm::vec3 pos(0.0f, 0.0f, 5.0f);
+glm::vec4 motion4(0.0f, 0.0f, 0.0f, 1.0f);
+GLfloat moveSpeed = 0.05f;
+
+void handleKeys() {
+    float deltaAng = 0.01;
+    motion4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        angUp += deltaAng;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        angUp -= deltaAng;
+    }
+
+    angUp = clamp(angUp, glm::radians(-89.0f), glm::radians(89.0f));
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        angLeft += deltaAng;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        angLeft -= deltaAng;
+    }
+
+    glm::vec3 motion(0.0f, 0.0f, 0.0f);
+
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        motion.z -= 1.0f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        motion.z += 1.0f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        motion.x -= 1.0f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        motion.x += 1.0f;
+    }
+
+    if (!(0.0f == motion.x && motion.x == motion.y && motion.y == motion.z)) {
+        motion = glm::normalize(motion);
+    }
+
+    motion4 = glm::vec4(motion.x, motion.y, motion.z, 1.0f);
+}
+
+
+const glm::mat4 identity = glm::identity<glm::mat4>();
+
+void animate() {
+    handleKeys();
+
+    //Set up uniforms
+    glm::mat4 matModel = identity;
+    glm::mat4 matView = identity;
+
+    matModel = glm::translate(matModel, {0, 0, 0});
+
+
+    glm::vec4 forward(0.0f, 0.0f, -1.0f, 1.0f);
+    glm::mat4 rotUp = glm::rotate(glm::identity<glm::mat4>(), angUp, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 rotLeft = glm::rotate(glm::identity<glm::mat4>(), angLeft, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    forward = rotLeft * rotUp * forward; 
+
+    motion4 = rotLeft * rotUp * motion4;
+
+
+    glm::vec3 truncForward = glm::vec3(forward.x, forward.y, forward.z);
+    glm::vec3 truncMotion = glm::vec3(motion4.x, motion4.y, motion4.z);
+
+    pos += truncMotion * moveSpeed;
+
+
+    //for (int i = 0; i < 3; i++) {
+    //    cout << truncMotion[i] << " ";
+    //}
+    //cout << endl;
+
+    matView = glm::lookAt(pos, pos + truncForward, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    cout << angUp << " " << angLeft << endl;
+
+    glUniformMatrix4fv(u_Model, 1, GL_FALSE, &matModel[0][0]);
+    glUniformMatrix4fv(u_View, 1, GL_FALSE, &matView[0][0]);
+    glUniformMatrix4fv(u_Projection, 1, GL_FALSE, &matProjection[0][0]);
+
+    GLfloat delta = boxSpeed * direction;
+    boxX = clamp(boxX + delta, -0.9f, 0.9f);
+    if (abs(boxX) >= 0.9f) {
+        direction *= -1.0f;
+    }
+}
+
+
+static void cursorPosCallback(GLFWwindow *win, double xPos, double yPos) {
+    cout << xPos << " " << yPos << endl;
+
+}
+
+
+
 int main() {
     //init GLFW
     if (glfwInit() != GLFW_TRUE) {
@@ -305,6 +452,10 @@ int main() {
     window = glfwCreateWindow(1024, 768, "cubetest", NULL, NULL);
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
+
 
     //init GLEW
     if (glewInit() != GLEW_OK) {
@@ -348,6 +499,13 @@ int main() {
 
     ShaderProgram program(vshader, fshader);
     program.findAttributes({"a_Pos", "a_Color"});
+    program.findUniforms({"u_Model", "u_View", "u_Projection"});
+
+    u_Model = program["u_Model"];
+    u_View = program["u_View"];
+    u_Projection = program["u_Projection"];
+
+
 
     vshader.cleanup();
     fshader.cleanup();
@@ -382,19 +540,18 @@ int main() {
     //set up drawing
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glUseProgram(program.id);
-
     glBindVertexArray(vao);
+
+
 
     //draw loop
     do {
         glClear(GL_COLOR_BUFFER_BIT);
-
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        animate();
     } while (glfwWindowShouldClose(window) != GLFW_TRUE && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
 
     //clean up
