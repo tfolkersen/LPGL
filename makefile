@@ -24,12 +24,13 @@ LLUA :=
 
 STBDIR := $(LIBDIR)/stb
 ISTB := -isystem $(STBDIR)
-LSTB :=
+LSTB := -L $(STBDIR) -lstb_image
 
 IFLAGS := $(IGLEW) $(IGLFW) $(IGLM) $(ISTB)
 LFLAGS := $(LGLEW) $(LGLFW) $(LGLM) $(LSTB)
 
-CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS) -lGL
+CPPFLAGSBASE := --std=c++17 -O3 -Wall -Wextra
+CPPFLAGS := $(CPPFLAGSBASE) $(IFLAGS) $(LFLAGS) -lGL
 
 SRC:= src
 
@@ -42,8 +43,8 @@ run: cubetest
 %.o: %.cpp
 	$(CXX) $< -o $@ $(CPPFLAGS) -c
 
-cubetest: $(SRC)/cubetest.cpp $(SRC)/stb_image.o
-	$(CXX) $^ -o cubetest $(CPPFLAGS)
+cubetest: $(SRC)/cubetest.cpp
+	$(CXX) $^ -o $@ $(CPPFLAGS)
 
 libtest:
 	-rm libtest
@@ -63,6 +64,8 @@ deps:
 	echo "#warning glm dummy file found" > $(GLMDIR)/glm/dummy.hpp
 	#Build Lua
 	make -C $(LUADIR) -j $(MAKETHREADS)
+	#Build stb_image
+	make -C $(STBDIR) -j $(MAKETHREADS) CXX=$(CXX) CPPFLAGS="$(CPPFLAGSBASE)"
 	#Done
 	echo "Done building LPGL dependencies"
 
@@ -71,11 +74,12 @@ cleandeps:
 	-make -C $(GLFWDIR)/build clean
 	-make -C $(GLMDIR)/glm clean
 	-make -C $(LUADIR) clean
+	-make -C $(STBDIR) clean
 	-rm -rf $(GLFWDIR)/build $(GLMDIR)/glm/build
 
 compdb:
 	-rm compile_commands.json
-	bear -- make libtest
+	bear -- make cubetest
 
 clean:
 	-rm -rf libtest cubetest $(SRC)/*.o
