@@ -460,16 +460,38 @@ int main() {
 
     //buffer data
     GLfloat vertexData[] = {
-        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //7 red
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, //9 blue
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, //3 green
-        -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, //1 yellow
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //7 red
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //9 blue
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //3 green
+        -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, //1 yellow
     };
 
     GLint elementData[] = {
         0, 1, 2,
         2, 3, 0,
     };
+
+    int imgWidth, imgHeight, imgChannels;
+    unsigned char *imgData = stbi_load("cubetest.png", &imgWidth, &imgHeight, &imgChannels, 0);
+    if (!imgData) {
+        cerr << "Failed to load texture" << endl;
+    } else {
+        cout << "Loaded texture: " << imgWidth << " " << imgHeight << " " << imgChannels << endl;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    //glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(imgData);
 
 
     GLuint vbuffer;
@@ -492,13 +514,13 @@ int main() {
     Shader fshader(fshaderCode, GL_FRAGMENT_SHADER);
 
     ShaderProgram program(vshader, fshader);
-    program.findAttributes({"a_Pos", "a_Color"});
-    program.findUniforms({"u_Model", "u_View", "u_Projection"});
+    program.findAttributes({"a_Pos", "a_Color", "a_UV"});
+    program.findUniforms({"u_Model", "u_View", "u_Projection", "u_Tex"});
 
     u_Model = program["u_Model"];
     u_View = program["u_View"];
     u_Projection = program["u_Projection"];
-
+    GLint u_Tex = program["u_Tex"];
 
 
     vshader.cleanup();
@@ -516,14 +538,24 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glUniform1i(u_Tex, 0);
+
     GLint a_Pos = program["a_Pos"];
     GLint a_Color = program["a_Color"];
+    GLint a_UV = program["a_UV"];
 
     glEnableVertexAttribArray(a_Pos);
-    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 
     glEnableVertexAttribArray(a_Color);
-    glVertexAttribPointer(a_Color, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+    glVertexAttribPointer(a_Color, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+
+
+    glEnableVertexAttribArray(a_UV);
+    glVertexAttribPointer(a_UV, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (6 * sizeof(GLfloat)));
+
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
