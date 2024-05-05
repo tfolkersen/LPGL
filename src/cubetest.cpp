@@ -315,16 +315,29 @@ int main() {
 
     //buffer data
     GLfloat vertexData[] = {
-        -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 1.0f,
-        0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //7 red
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, //9 blue
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, //3 green
+        -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, //1 yellow
     };
+
+    GLint elementData[] = {
+        0, 1, 2,
+        2, 3, 0,
+    };
+
 
     GLuint vbuffer;
     glGenBuffers(1, &vbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint ebuffer;
+    glGenBuffers(1, &ebuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementData), elementData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     //set up shader program
     string vshaderCode = readFile("shaders/cubetest.vshader");
@@ -349,6 +362,7 @@ int main() {
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
 
     GLint a_Pos = program["a_Pos"];
     GLint a_Color = program["a_Color"];
@@ -361,6 +375,7 @@ int main() {
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(a_Pos);
     glDisableVertexAttribArray(a_Color);
 
@@ -374,7 +389,8 @@ int main() {
     do {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
         glfwSwapBuffers(window);
