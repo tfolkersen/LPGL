@@ -354,14 +354,21 @@ int main() {
     GLint a_Color = program["a_Color"];
 
     glEnableVertexAttribArray(a_Pos);
-    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
     glEnableVertexAttribArray(a_Color);
-    glVertexAttribPointer(a_Color, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+    glVertexAttribPointer(a_Color, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray(a_Pos);
+    glDisableVertexAttribArray(a_Color);
 
     //set up drawing
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glUseProgram(program.id);
+
+    glBindVertexArray(vao);
 
     //draw loop
     do {
