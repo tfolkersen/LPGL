@@ -22,8 +22,12 @@ LUADIR := $(LIBDIR)/lua-5.4.6
 ILUA := -isystem $(LUADIR)/src
 LLUA := 
 
-IFLAGS := $(IGLEW) $(IGLFW) $(IGLM)
-LFLAGS := $(LGLEW) $(LGLFW) $(LGLM)
+STBDIR := $(LIBDIR)/stb
+ISTB := -isystem $(STBDIR)
+LSTB :=
+
+IFLAGS := $(IGLEW) $(IGLFW) $(IGLM) $(ISTB)
+LFLAGS := $(LGLEW) $(LGLFW) $(LGLM) $(LSTB)
 
 CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS) -lGL
 
