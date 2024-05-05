@@ -33,10 +33,14 @@ CPPFLAGS := --std=c++17 -O3 -Wall -Wextra $(IFLAGS) $(LFLAGS) -lGL
 
 SRC:= src
 
-cubetest:
+
+%.o: %.cpp %.h
+	$(CXX) $< -o $@ $(CPPFLAGS) -c
+
+cubetest: $(SRC)/stb_image.o
 	-rm cubetest
 	clear
-	$(CXX) $(SRC)/cubetest.cpp -o cubetest $(CPPFLAGS)
+	$(CXX) $(SRC)/cubetest.cpp $^ -o cubetest $(CPPFLAGS)
 	./cubetest
 
 libtest:
@@ -72,6 +76,6 @@ compdb:
 	bear -- make libtest
 
 clean:
-	-rm -rf libtest cubetest
+	-rm -rf libtest cubetest $(SRC)/*.o
 
 cleanall: cleandeps clean
