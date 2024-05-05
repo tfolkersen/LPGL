@@ -350,16 +350,24 @@ int main() {
 
     glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
 
-    
+    GLint a_Pos = program["a_Pos"];
+    GLint a_Color = program["a_Color"];
 
+    glEnableVertexAttribArray(a_Pos);
+    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), 0);
 
+    glEnableVertexAttribArray(a_Color);
+    glVertexAttribPointer(a_Color, 3, GL_FLOAT, false, 6 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
 
     //set up drawing
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glUseProgram(program.id);
 
     //draw loop
     do {
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
         glfwSwapBuffers(window);
