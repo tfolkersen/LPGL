@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <ios>
 #include <string.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
@@ -425,7 +426,7 @@ glm::vec4 motion4(0.0f, 0.0f, 0.0f, 1.0f);
 GLfloat moveSpeed = 0.05f;
 
 void handleKeys() {
-    float deltaAng = 0.01;
+    float deltaAng = 0.018;
     motion4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -518,6 +519,126 @@ static void cursorPosCallback(GLFWwindow *win, double xPos, double yPos) {
 
 }
 
+GLuint jankBuffer;
+
+void framebufferJank() {
+    Shader vs(readFile("shaders/cubetest-fb.vshader"), GL_VERTEX_SHADER);
+    Shader fs(readFile("shaders/cubetest-fb.fshader"), GL_FRAGMENT_SHADER);
+
+    ShaderProgram program(vs, fs);
+
+    vs.cleanup();
+    fs.cleanup();
+
+    cout << "FB Shader: " << program.statusLog << endl;
+
+    program.findAttributes({"a_Pos", "a_UV"});
+    program.findUniforms({"u_Tex0", "u_Tex1"});
+
+    Texture t0("orange-gradient.png", TEXTURE_FILENAME);
+    Texture t1("colors.png", TEXTURE_FILENAME);
+
+    GLfloat vertexData[] = {
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, //7
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f, //9
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f, //3
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, //1
+    }; 
+
+    GLint elementData[] = {
+        0, 1, 2,
+        2, 3, 0,
+    };
+
+    GLuint vbuffer;
+    glGenBuffers(1, &vbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+    GLuint ebuffer;
+    glGenBuffers(1, &ebuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementData), elementData, GL_STATIC_DRAW);
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
+
+    GLint a_Pos = program["a_Pos"];
+    GLint a_UV = program["a_UV"];
+
+    glEnableVertexAttribArray(a_Pos);
+    glVertexAttribPointer(a_Pos, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+
+    glEnableVertexAttribArray(a_UV);
+    glVertexAttribPointer(a_UV, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
+
+    //create framebuffer
+    GLuint framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+
+    auto checkfb = []() {
+        GLenum fbstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        cout << hex;
+        cout << "Framebuffer status: " << fbstatus << endl; 
+        cout << dec;
+    };
+
+    checkfb();
+
+
+    GLuint texMain;
+    glGenTextures(1, &texMain);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texMain);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    int w = 256;
+    int h = 256;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texMain, 0);
+
+    jankBuffer = texMain;
+
+    checkfb();
+
+    //Draw to framebuffer
+    glUseProgram(program.id);
+    glViewport(0, 0, w, h);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, t0.id);
+    GLint u_Tex0 = program["u_Tex0"];
+    glUniform1i(u_Tex0, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, t1.id);
+    GLint u_Tex1 = program["u_Tex1"];
+    glUniform1i(u_Tex1, 1);
+
+    cout << "u_Tex0 u_Tex1: " << u_Tex0 << " " << u_Tex1 << endl;
+
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    //Bind default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
 
 
 int main() {
@@ -549,12 +670,15 @@ int main() {
         return -1;
     }
 
+    //framebuffer
+    framebufferJank();
+
     //buffer data
     GLfloat vertexData[] = {
-        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //7 red
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //9 blue
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //3 green
-        -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, //1 yellow
+        -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //7 red
+        1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //9 blue
+        1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //3 green
+        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, //1 yellow
     };
 
     GLint elementData[] = {
@@ -630,6 +754,7 @@ int main() {
     glDisableVertexAttribArray(a_Color);
 
     //set up drawing
+    glViewport(0, 0, 1024, 768);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glUseProgram(program.id);
     glBindVertexArray(vao);
@@ -639,9 +764,10 @@ int main() {
     GLint u_Tex0 = program["u_Tex0"];
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture.id);
+    //glBindTexture(GL_TEXTURE_2D, texture.id);
+    glBindTexture(GL_TEXTURE_2D, jankBuffer);
 
-    glUniform1i(u_Tex0, GL_TEXTURE0);
+    glUniform1i(u_Tex0, 0);
 
     //draw loop
     do {
