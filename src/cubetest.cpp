@@ -318,7 +318,7 @@ Texture::Texture(const void *buffer, int bufferType, int width, int height, int 
     unsigned char *stbi_data = NULL;
 
     if (bufferType == TEXTURE_FILENAME) {
-        stbi_data = stbi_load((const char *) buffer, &width, &height, &channels, 0);
+        stbi_data = stbi_load((const char *) buffer, &width, &height, &channels, 4);
 
         if (!stbi_data) {
             id = 0;
