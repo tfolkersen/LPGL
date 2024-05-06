@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <string.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -10,6 +11,7 @@
 
 #include <iostream>
 
+#include <string>
 #include <vector>
 #include <unordered_map>
 
@@ -292,7 +294,96 @@ GLint ShaderProgram::operator[](const std::string &name) {
 }
 
 
+//////////////////////////////////////////////////////////// TEXTURES
+enum TEXTURECONSTANTS {
+    TEXTURE_ERROR = -1,
+    TEXTURE_DELETED = 0,
+    TEXTURE_OK = 1,
+    TEXTURE_FILENAME,
+    TEXTURE_RAWDATA,
+};
 
+struct Texture {
+    GLuint id;
+    int status;
+    std::string statusLog;
+
+    Texture(const void *buffer, int bufferType, int width = 0, int height = 0, int channels = 0);
+    void cleanup();
+};
+
+
+
+Texture::Texture(const void *buffer, int bufferType, int width, int height, int channels) {
+    unsigned char *stbi_data = NULL;
+
+    if (bufferType == TEXTURE_FILENAME) {
+        stbi_data = stbi_load((const char *) buffer, &width, &height, &channels, 0);
+
+        if (!stbi_data) {
+            id = 0;
+            status = TEXTURE_ERROR;
+            statusLog = "Texture failed stbi_load of file: " + string((const char *) buffer);
+            
+            cerr << statusLog << endl;
+            return;
+        }
+    } else if (bufferType == TEXTURE_RAWDATA) {
+        //nothing to do here?
+    } else {
+        id = 0;
+        status = TEXTURE_ERROR;
+        statusLog = "Texture constructor invalid bufferType: " + to_string(bufferType);
+
+        cerr << statusLog << endl;
+        return;
+    }
+
+    //Make texture
+    glGenTextures(1, &id);
+
+    if (id == 0) {
+        status = TEXTURE_ERROR;
+        statusLog = "Texture failed call to glGenTextures";
+
+        cerr << statusLog << endl;
+
+        if (stbi_data) {
+            stbi_image_free(stbi_data);
+        }
+
+        return;
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    const void *imgBuffer = bufferType == TEXTURE_FILENAME ? stbi_data : buffer;
+
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBuffer);
+
+    status = TEXTURE_OK;
+    statusLog = "Success";
+
+    if (stbi_data) {
+        stbi_image_free(stbi_data);
+    }
+}
+
+void Texture::cleanup() {
+    if (status == TEXTURE_OK) {
+        glDeleteTextures(1, &id);
+    }
+
+    id = 0;
+    status = TEXTURE_DELETED;
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -471,28 +562,7 @@ int main() {
         2, 3, 0,
     };
 
-    int imgWidth, imgHeight, imgChannels;
-    unsigned char *imgData = stbi_load("cubetest.png", &imgWidth, &imgHeight, &imgChannels, 0);
-    if (!imgData) {
-        cerr << "Failed to load texture" << endl;
-    } else {
-        cout << "Loaded texture: " << imgWidth << " " << imgHeight << " " << imgChannels << endl;
-    }
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
-    //glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(imgData);
-
+    Texture texture("cubetest.png", TEXTURE_FILENAME);
 
     GLuint vbuffer;
     glGenBuffers(1, &vbuffer);
@@ -515,12 +585,12 @@ int main() {
 
     ShaderProgram program(vshader, fshader);
     program.findAttributes({"a_Pos", "a_Color", "a_UV"});
-    program.findUniforms({"u_Model", "u_View", "u_Projection", "u_Tex"});
+    program.findUniforms({"u_Model", "u_View", "u_Projection", "u_Tex0"});
 
     u_Model = program["u_Model"];
     u_View = program["u_View"];
     u_Projection = program["u_Projection"];
-    GLint u_Tex = program["u_Tex"];
+
 
 
     vshader.cleanup();
@@ -538,10 +608,6 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebuffer);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1i(u_Tex, GL_TEXTURE0);
-
     GLint a_Pos = program["a_Pos"];
     GLint a_Color = program["a_Color"];
     GLint a_UV = program["a_UV"];
@@ -552,9 +618,9 @@ int main() {
     glEnableVertexAttribArray(a_Color);
     glVertexAttribPointer(a_Color, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (3 * sizeof(GLfloat)));
 
-
     glEnableVertexAttribArray(a_UV);
     glVertexAttribPointer(a_UV, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *) (6 * sizeof(GLfloat)));
+
 
 
     glBindVertexArray(0);
@@ -562,7 +628,6 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(a_Pos);
     glDisableVertexAttribArray(a_Color);
-    //glBindTexture(GL_TEXTURE_2D, 0);
 
     //set up drawing
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -570,6 +635,13 @@ int main() {
     glBindVertexArray(vao);
 
 
+
+    GLint u_Tex0 = program["u_Tex0"];
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture.id);
+
+    glUniform1i(u_Tex0, GL_TEXTURE0);
 
     //draw loop
     do {
