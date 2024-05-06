@@ -639,7 +639,19 @@ void framebufferJank() {
 
 }
 
+void stencilJank() {
+    glEnable(GL_STENCIL_TEST);
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    glStencilMask(0xFF);
+
+    glStencilFunc(GL_GREATER, 1, 0xFF); //test to apply to fragments
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+
+
+}
 
 int main() {
     //init GLFW
@@ -670,8 +682,11 @@ int main() {
         return -1;
     }
 
+
     //framebuffer
     framebufferJank();
+
+    stencilJank();
 
     //buffer data
     GLfloat vertexData[] = {
