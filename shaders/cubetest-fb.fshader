@@ -14,4 +14,8 @@ void main() {
     vec4 color1 = texture(u_Tex1, uv);
 
     fragColor = (0.5 * color0 + 0.5 * color1).xyz;
+
+    if (uv.x < 0.2 || uv.x > 0.8) {
+        discard;
+    }
 }
