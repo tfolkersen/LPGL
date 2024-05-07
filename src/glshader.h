@@ -13,6 +13,13 @@ enum GLSHADER_CONSTANTS {
     FSHADER = GL_FRAGMENT_SHADER,
 };
 
+enum GLPROGRAM_CONSTANTS {
+    GLPROGRAM_ERROR = -1,
+    GLPROGRAM_EMPTY = 0,
+    GLPROGRAM_OK = 1,
+};
+
+
 
 bool _buildShader(GLuint &id, int &status, std::string &statusLog, int type, const std::string &shaderCode);
 
@@ -49,7 +56,6 @@ struct GLshader {
     }
 
     ~GLshader() {
-        DPRINT("GLshader destructor"); //TODO REMOVE
         cleanup();
     }
 
@@ -82,6 +88,10 @@ struct GLshader {
     }
 
     void cleanup() {
+        if (status == GLSHADER_EMPTY) {
+            return;
+        }
+
         if (status == GLSHADER_OK) {
             glDeleteShader(id);
         }
@@ -95,8 +105,28 @@ struct GLshader {
         id = 0;
         status = GLSHADER_EMPTY;
         statusLog = "Uninitialized";
-
-        DPRINT("GLshader constructor"); //TODO REMOVE
     }
 };
 
+
+struct GLprogram {
+    GLuint id;
+    int status;
+    std::string statusLog;
+
+    static GLprogram fromStrings(const std::string &vshaderCode, const std::string &fshaderCode);
+    static GLprogram fromFiles(const std::string &vsFilename, const std::string &fsFilename);
+    static GLprogram fromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader);
+
+    GLprogram();
+    ~GLprogram();
+
+    friend std::ostream &operator<<(std::ostream &os, const GLprogram &program);
+    friend std::ostream &operator<<(std::ostream &os, GLprogram &program);
+
+    void cleanup();
+
+    void buildFromStrings(const std::string &vshaderCode, const std::string &fshaderCode);
+    void buildFromFiles(const std::string &vsFilename, const std::string &fsFilename);
+    void buildFromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader);
+};

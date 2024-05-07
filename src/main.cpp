@@ -56,6 +56,9 @@ int main() {
     const auto &vss = vs;
     cout << vss << endl;
 
+    auto program = GLprogram::fromShaders(vs, fs); 
+    cout << program << endl;
+
 
     //draw loop
     do {

@@ -1,4 +1,7 @@
 #include "glshader.h"
+#include "utils.h"
+#include <string>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -48,3 +51,168 @@ bool _buildShader(GLuint &id, int &status, string &statusLog, int type, const st
 
     return true;
 }
+
+
+////////////////////////////// GLprogram implementation
+
+GLprogram GLprogram::fromStrings(const std::string &vshaderCode, const std::string &fshaderCode) {
+    GLprogram program;
+    program.buildFromStrings(vshaderCode, fshaderCode);
+    return program;
+}
+
+GLprogram GLprogram::fromFiles(const std::string &vsFilename, const std::string &fsFilename) {
+    GLprogram program;
+    program.buildFromFiles(vsFilename, fsFilename);
+    return program;
+}
+
+GLprogram GLprogram::fromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader) {
+    GLprogram program;
+    program.buildFromShaders(vshader, fshader);
+    return program;
+}
+
+GLprogram::GLprogram() {
+    id = 0;
+    status = GLPROGRAM_EMPTY;
+    statusLog = "Uninitialized";
+}
+
+GLprogram::~GLprogram() {
+    cleanup();
+}
+
+std::ostream &operator<<(std::ostream &os, const GLprogram &program) {
+    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, GLprogram &program) {
+    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
+    return os;
+}
+
+void GLprogram::cleanup() {
+    if (status == GLPROGRAM_EMPTY) {
+        return;
+    }
+
+    if (status == GLPROGRAM_OK) {
+        glDeleteProgram(id);
+    }
+
+    id = 0;
+    status = GLPROGRAM_EMPTY;
+    statusLog = "Uninitialized";
+}
+
+
+void GLprogram::buildFromStrings(const std::string &vshaderCode, const std::string &fshaderCode) {
+    cleanup();
+
+    auto vs = GLshader<VSHADER>::fromString(vshaderCode);
+    auto fs = GLshader<FSHADER>::fromString(fshaderCode);
+    this->buildFromShaders(vs, fs);
+}
+
+void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string &fsFilename) {
+    cleanup();
+
+    string vsCode;
+    string fsCode;
+
+    bool ok1 = readFile(vsCode, vsFilename);
+
+    if (!ok1) {
+        id = 0;
+        status = GLPROGRAM_ERROR;
+        statusLog = "GLprogram buildFromFiles() failed to read vshader file: " + vsFilename;
+        cerr << statusLog << endl;
+
+        return;
+    }
+
+    bool ok2 = readFile(fsCode, fsFilename);
+
+    if (!ok2) {
+        id = 0;
+        status = GLPROGRAM_ERROR;
+        statusLog = "GLprogram buildFromFiles() failed to read fshader file: " + fsFilename;
+        cerr << statusLog << endl;
+
+        return;
+    }
+
+    this->buildFromStrings(vsCode, fsCode);
+}
+
+void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader) {
+    cleanup();
+
+    bool error = false;
+    statusLog = "";
+
+    if (vshader.status != GLSHADER_OK) {
+        statusLog += "vshader bad status: " + to_string(vshader.status) + " ";
+        error = true;
+    }
+
+    if (fshader.status != GLSHADER_OK) {
+        statusLog += "fshader bad status: " + to_string(fshader.status) + " ";
+        error = true;
+    }
+
+    if (error) {
+        id = 0;
+        status = GLPROGRAM_ERROR;
+        statusLog = "GLprogram buildFromShaders() error: " + statusLog;
+
+        cerr << statusLog << endl;
+        return;
+    }
+
+    id = glCreateProgram();
+
+    if (id == 0) {
+        status = GLPROGRAM_ERROR;
+        statusLog = "GLprogram buildFromShaders() failed call to glCreateProgram()";
+        cerr << statusLog << endl;
+        return;
+    }
+
+    glAttachShader(id, vshader.id);
+    glAttachShader(id, fshader.id);
+    glLinkProgram(id);
+
+    GLint linkStatus;
+    glGetProgramiv(id, GL_LINK_STATUS, &linkStatus);
+
+    if (linkStatus == GL_TRUE) {
+        status = GLPROGRAM_OK;
+        statusLog = "Success";
+        return;
+
+    } else {
+        status = GLPROGRAM_ERROR;
+
+        GLint errorSize;
+
+        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &errorSize);
+
+        char *errorText = new char[errorSize];
+        errorText[errorSize - 1] = 0;
+
+        glGetProgramInfoLog(id, errorSize, NULL, errorText);
+
+        statusLog = "GLprogram buildFromShaders() failed call to glLinkProgram(): " + string(errorText);
+        cerr << statusLog << endl;
+
+        delete[] errorText;
+
+        glDeleteProgram(id);
+        id = 0;
+        return;
+    }
+}
+
