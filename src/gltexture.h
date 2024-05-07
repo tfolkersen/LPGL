@@ -1,10 +1,11 @@
 #pragma once
+
 #include <GL/glew.h>
 #include <string>
 
 enum TEXTURE_CONSTANTS {
     TEXTURE_ERROR = -1,
-    TEXTURE_DELETED = 0,
+    TEXTURE_EMPTY = 0,
     TEXTURE_OK = 1,
 };
 
@@ -21,6 +22,8 @@ struct Texture {
   private:
     //Texture();
 };
+
+
 
 
 

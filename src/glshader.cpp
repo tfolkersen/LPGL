@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool _buildShader(GLuint &id, int &status, string &statusLog, int type, const string &shaderCode) {
+bool _buildShader(GLuint &id, GLshaderEnum &status, string &statusLog, int type, const string &shaderCode) {
     id = glCreateShader(type);
 
     if (id == 0) {
@@ -74,7 +74,6 @@ GLprogram GLprogram::fromShaders(const GLshader<VSHADER> &vshader, const GLshade
 }
 
 GLprogram::GLprogram() {
-
     id = 0;
     status = GLPROGRAM_EMPTY;
     statusLog = "Uninitialized";

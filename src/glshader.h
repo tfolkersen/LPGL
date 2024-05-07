@@ -7,31 +7,32 @@
 #include <unordered_map>
 #include <vector>
 
-enum GLSHADER_CONSTANTS {
+enum GLshaderEnum {
     GLSHADER_ERROR = -1,
     GLSHADER_EMPTY = 0,
     GLSHADER_OK = 1,
+};
+
+enum GLshaderTypeEnum {
     VSHADER = GL_VERTEX_SHADER,
     FSHADER = GL_FRAGMENT_SHADER,
 };
 
-enum GLPROGRAM_CONSTANTS {
+enum GLprogramEnum {
     GLPROGRAM_ERROR = -1,
     GLPROGRAM_EMPTY = 0,
     GLPROGRAM_OK = 1,
 };
 
 
-bool _buildShader(GLuint &id, int &status, std::string &statusLog, int type, const std::string &shaderCode);
+bool _buildShader(GLuint &id, GLshaderEnum &status, std::string &statusLog, int type, const std::string &shaderCode);
 
-template <int T>
+template <GLshaderTypeEnum T>
 struct GLshader {
-    static_assert(T == VSHADER || T == FSHADER);
-
     GLuint id;
-    int status;
+    GLshaderEnum status;
     std::string statusLog;
-    static const int type = T;
+    static const int glType = T;
 
 
     static GLshader<T> fromString(const std::string &shaderCode) {
@@ -113,7 +114,7 @@ struct GLshader {
 
 struct GLprogram {
     GLuint id;
-    int status;
+    GLprogramEnum status;
     std::string statusLog;
 
     static GLprogram fromStrings(const std::string &vshaderCode, const std::string &fshaderCode);
