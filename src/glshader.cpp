@@ -8,36 +8,47 @@ using namespace std;
 bool buildShader(GLuint &id, int &status, string &statusLog, int type, const string &shaderCode);
 
 
-////////////////////////////// GLfshader implementation
+////////////////////////////// GLshader<T> implementation
 
-GLfshader GLfshader::fromString(const string &shaderCode) {
-    GLfshader shader;
+template <int T>
+GLshader<T> GLshader<T>::fromString(const string &shaderCode) {
+    GLshader<T> shader;
     shader._buildFromString(shaderCode);
     return shader;
 }
 
 
-GLfshader GLfshader::fromFile(const string &fileName) {
-    GLfshader shader;
+template <int T>
+GLshader<T> GLshader<T>::fromFile(const string &fileName) {
+    GLshader<T> shader;
     shader._buildFromFile(fileName);
     return shader;
 }
 
 
-ostream &operator<<(ostream &os, GLfshader &shader) {
-    os << "GLfshader " << shader.id << " " << shader.status << " | " << shader.statusLog << " |";
+template <int T>
+ostream &operator<<(ostream &os, GLshader<T> &shader) {
+    os << "GLshader<" << T << "> " << shader.id << " " << shader.status << " | " << shader.statusLog << " |";
     return os;
 }
 
-GLfshader::~GLfshader() {
+
+template <int T>
+GLshader<T>::~GLshader() {
+    cout << "glshader dest" << endl; //TODO REMOVE
     cleanup();
 }
 
-GLfshader::GLfshader() {
+
+template <int T>
+GLshader<T>::GLshader() {
+    cout << "glshader const" << endl; //TODO REMOVE
 }
 
-void GLfshader::_buildFromString(const std::string &shaderCode) {
-    bool success = buildShader(id, status, statusLog, GL_FRAGMENT_SHADER, shaderCode);
+
+template <int T>
+void GLshader<T>::_buildFromString(const std::string &shaderCode) {
+    bool success = buildShader(id, status, statusLog, T, shaderCode);
 
     if (!success) {
         cerr << *this << endl;
@@ -45,7 +56,8 @@ void GLfshader::_buildFromString(const std::string &shaderCode) {
 }
 
 
-void GLfshader::_buildFromFile(const std::string &fileName) {
+template <int T>
+void GLshader<T>::_buildFromFile(const std::string &fileName) {
     string sourceCode;
     bool success = readFile(sourceCode, fileName);
 
@@ -53,12 +65,16 @@ void GLfshader::_buildFromFile(const std::string &fileName) {
         this->id = 0;
         this->status = GLSHADER_ERROR;
         this->statusLog = "_buildFromFile failed at readFile()";
+
+        cerr << *this << endl;
     }
 
     this->_buildFromString(sourceCode);
 }
 
-void GLfshader::cleanup() {
+
+template <int T>
+void GLshader<T>::cleanup() {
     if (status == GLSHADER_OK) {
         glDeleteShader(id);
     }
@@ -66,7 +82,6 @@ void GLfshader::cleanup() {
     status = GLSHADER_DELETED;
     id = 0;
 }
-
 
 
 ////////////////////////////// File private functions

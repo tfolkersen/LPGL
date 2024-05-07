@@ -7,42 +7,35 @@ enum GLSHADER_CONSTANTS {
     GLSHADER_ERROR = -1,
     GLSHADER_DELETED = 0,
     GLSHADER_OK = 1,
+    VSHADER = GL_VERTEX_SHADER,
+    FSHADER = GL_FRAGMENT_SHADER,
 };
 
+template <int T>
+struct GLshader {
+    static_assert(T == VSHADER || T == FSHADER);
 
-/*
-struct GLvshader {
     GLuint id;
     int status;
     std::string statusLog;
 
-    static GLvshader fromString(const std::string &shaderCode);
-    static GLvshader fromFile(const std::string &fileName);
+    static const int type = T;
+    static GLshader<T> fromString(const std::string &shaderCode);
+    static GLshader<T> fromFile(const std::string &fileName);
+
+    template <int S>
+    friend std::ostream &operator<<(std::ostream &os, GLshader<S> &shader);
+
+    ~GLshader();
 
   private:
-    GLvshader();
-};
-*/
-
-struct GLfshader {
-    GLuint id;
-    int status;
-    std::string statusLog;
-
-    static GLfshader fromString(const std::string &shaderCode);
-    static GLfshader fromFile(const std::string &fileName);
-
-    friend std::ostream &operator<<(std::ostream &os, GLfshader &shader);
-
-    ~GLfshader();
-
-  private:
-    GLfshader();
+    GLshader();
     void _buildFromString(const std::string &shaderCode);
     void _buildFromFile(const std::string &fileName);
     void cleanup();
 };
 
 
+template <int T>
+std::ostream &operator<<(std::ostream &os, GLshader<T> &shader);
 
-std::ostream &operator<<(std::ostream &os, GLfshader &shader);
