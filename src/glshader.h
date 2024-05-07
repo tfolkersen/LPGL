@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include "utils.h"
+#include <unordered_map>
+#include <vector>
 
 enum GLSHADER_CONSTANTS {
     GLSHADER_ERROR = -1,
@@ -18,7 +20,6 @@ enum GLPROGRAM_CONSTANTS {
     GLPROGRAM_EMPTY = 0,
     GLPROGRAM_OK = 1,
 };
-
 
 
 bool _buildShader(GLuint &id, int &status, std::string &statusLog, int type, const std::string &shaderCode);
@@ -109,6 +110,7 @@ struct GLshader {
 };
 
 
+
 struct GLprogram {
     GLuint id;
     int status;
@@ -129,4 +131,16 @@ struct GLprogram {
     void buildFromStrings(const std::string &vshaderCode, const std::string &fshaderCode);
     void buildFromFiles(const std::string &vsFilename, const std::string &fsFilename);
     void buildFromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader);
+
+    GLint a(const std::string &name);
+    GLint u(const std::string &name);
+
+    std::vector<GLint> as(const std::vector<std::string> &names);
+    std::vector<GLint> us(const std::vector<std::string> &names);
+
+
+
+  private:
+    std::unordered_map<std::string, GLint> aMap;
+    std::unordered_map<std::string, GLint> uMap;
 };

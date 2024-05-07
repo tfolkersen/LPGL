@@ -74,6 +74,7 @@ GLprogram GLprogram::fromShaders(const GLshader<VSHADER> &vshader, const GLshade
 }
 
 GLprogram::GLprogram() {
+
     id = 0;
     status = GLPROGRAM_EMPTY;
     statusLog = "Uninitialized";
@@ -94,6 +95,9 @@ std::ostream &operator<<(std::ostream &os, GLprogram &program) {
 }
 
 void GLprogram::cleanup() {
+    aMap.clear();
+    uMap.clear();
+
     if (status == GLPROGRAM_EMPTY) {
         return;
     }
@@ -214,5 +218,71 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
         id = 0;
         return;
     }
+}
+
+
+
+
+GLint GLprogram::a(const std::string &name) {
+    //Check map for value
+    auto it = aMap.find(name);
+
+    if (it != aMap.end()) {
+        return it->second;
+    }
+
+    //Not found, check program
+    if (status != GLPROGRAM_OK) {
+        return -1;
+    }
+
+    GLint val = glGetAttribLocation(id, name.c_str());
+
+    aMap[name] = val;
+
+    return val;
+}
+
+
+GLint GLprogram::u(const std::string &name) {
+    //Check map for value
+    auto it = uMap.find(name);
+
+    if (it != uMap.end()) {
+        return it->second;
+    }
+
+    //Not found, check program
+    if (status != GLPROGRAM_OK) {
+        return -1;
+    }
+
+    GLint val = glGetUniformLocation(id, name.c_str());
+
+    uMap[name] = val;
+
+    return val;
+}
+
+
+vector<GLint> GLprogram::as(const vector<string> &names) {
+    vector<GLint> vals;
+
+    for (const string &name : names) {
+        vals.push_back(a(name));
+    }
+
+    return vals;
+}
+
+
+vector<GLint> GLprogram::us(const vector<string> &names) {
+    vector<GLint> vals;
+
+    for (const string &name : names) {
+        vals.push_back(u(name));
+    }
+
+    return vals;
 }
 

@@ -60,6 +60,23 @@ int main() {
     cout << program << endl;
 
 
+    cout << "Attributes: ";
+    cout << program.a("a_Pos") << " ";
+    cout << program.a("a_Color") << " ";
+    cout << program.a("a_UV") << " ";
+    cout << endl;
+
+    cout << "Uniforms: ";
+    cout << program.u("u_Model") << " ";
+    cout << program.u("u_View") << " ";
+    cout << program.u("u_Projection") << " ";
+    cout << program.u("u_Tex0") << " ";
+    cout << endl;
+
+    cout << program.as({"a_Pos", "a_Color", "a_UV"}) << endl;
+    cout << program.us({"u_Model", "u_View", "u_Projection", "u_Tex0"}) << endl;
+
+
     //draw loop
     do {
         glClear(GL_COLOR_BUFFER_BIT);
