@@ -32,16 +32,23 @@ LFLAGS := $(LGLEW) $(LGLFW) $(LGLM) $(LSTB)
 CPPFLAGSBASE := --std=c++17 -O3 -Wall -Wextra
 CPPFLAGS := $(CPPFLAGSBASE) $(IFLAGS) $(LFLAGS) -lGL
 
-SRC:= src
+SRC := src
 
-run: cubetest
-	./cubetest
+MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o
+
+run: main
+	./main
 
 %.o: %.cpp %.h
 	$(CXX) $< -o $@ $(CPPFLAGS) -c
+	echo
 
 %.o: %.cpp
 	$(CXX) $< -o $@ $(CPPFLAGS) -c
+	echo
+
+main: $(SRC)/main.cpp $(MAINOBJS)
+	$(CXX) $^ -o $@ $(CPPFLAGS)
 
 cubetest: $(SRC)/cubetest.cpp
 	$(CXX) $^ -o $@ $(CPPFLAGS)
@@ -79,7 +86,7 @@ cleandeps:
 
 compdb:
 	-rm compile_commands.json
-	bear -- make cubetest
+	bear -- make main
 
 clean:
 	-rm -rf libtest cubetest $(SRC)/*.o
