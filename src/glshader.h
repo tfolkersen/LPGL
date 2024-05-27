@@ -7,6 +7,13 @@
 #include <unordered_map>
 #include <vector>
 
+/*
+    TODO:
+    shrink these enums
+    add release() functions
+    implement GLtexture
+*/
+
 enum GLshaderEnum {
     GLSHADER_ERROR = -1,
     GLSHADER_EMPTY = 0,
