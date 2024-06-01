@@ -9,8 +9,8 @@ bool _buildShader(GLuint &id, GLshaderEnum &status, string &statusLog, int type,
     id = glCreateShader(type);
 
     if (id == 0) {
-        statusLog = "_buildShader() failed call to glCreateShader()";
         status = GLSHADER_ERROR;
+        statusLog = "_buildShader() failed call to glCreateShader()";
         return false;
     }
 
@@ -73,15 +73,50 @@ GLprogram GLprogram::fromShaders(const GLshader<VSHADER> &vshader, const GLshade
     return program;
 }
 
+void GLprogram::release() {
+    id = 0;
+    status = GLPROGRAM_EMPTY;
+    statusLog.clear();
+
+    aMap.clear();
+    uMap.clear();
+}
+
 GLprogram::GLprogram() {
     id = 0;
     status = GLPROGRAM_EMPTY;
-    statusLog = "Uninitialized";
 }
 
 GLprogram::~GLprogram() {
     cleanup();
 }
+
+GLprogram::GLprogram(GLprogram &&other) noexcept {
+    id = other.id;
+    status = other.status;
+    statusLog = move(other.statusLog);
+
+    aMap = move(other.aMap);
+    uMap = move(other.uMap);
+
+    other.release();
+}
+
+GLprogram &GLprogram::operator=(GLprogram &&other) noexcept {
+    cleanup();
+
+    id = other.id;
+    status = other.status;
+    statusLog = move(other.statusLog);
+
+    aMap = move(other.aMap);
+    uMap = move(other.uMap);
+
+    other.release();
+
+    return *this;
+}
+
 
 std::ostream &operator<<(std::ostream &os, const GLprogram &program) {
     os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
@@ -94,9 +129,6 @@ std::ostream &operator<<(std::ostream &os, GLprogram &program) {
 }
 
 void GLprogram::cleanup() {
-    aMap.clear();
-    uMap.clear();
-
     if (status == GLPROGRAM_EMPTY) {
         return;
     }
@@ -105,9 +137,7 @@ void GLprogram::cleanup() {
         glDeleteProgram(id);
     }
 
-    id = 0;
-    status = GLPROGRAM_EMPTY;
-    statusLog = "Uninitialized";
+    release();
 }
 
 
@@ -131,7 +161,7 @@ void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string 
         id = 0;
         status = GLPROGRAM_ERROR;
         statusLog = "GLprogram buildFromFiles() failed to read vshader file: " + vsFilename;
-        cerr << statusLog << endl;
+        cerr << *this << endl;
 
         return;
     }
@@ -142,7 +172,7 @@ void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string 
         id = 0;
         status = GLPROGRAM_ERROR;
         statusLog = "GLprogram buildFromFiles() failed to read fshader file: " + fsFilename;
-        cerr << statusLog << endl;
+        cerr << *this << endl;
 
         return;
     }
@@ -154,15 +184,14 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
     cleanup();
 
     bool error = false;
-    statusLog = "";
 
     if (vshader.status != GLSHADER_OK) {
-        statusLog += "vshader bad status: " + to_string(vshader.status) + " ";
+        statusLog += "vshader bad status: |" + vshader.statusLog + "| ";
         error = true;
     }
 
     if (fshader.status != GLSHADER_OK) {
-        statusLog += "fshader bad status: " + to_string(fshader.status) + " ";
+        statusLog += "fshader bad status: |" + fshader.statusLog + "| ";
         error = true;
     }
 
@@ -171,7 +200,7 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
         status = GLPROGRAM_ERROR;
         statusLog = "GLprogram buildFromShaders() error: " + statusLog;
 
-        cerr << statusLog << endl;
+        cerr << *this << endl;
         return;
     }
 
@@ -180,7 +209,7 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
     if (id == 0) {
         status = GLPROGRAM_ERROR;
         statusLog = "GLprogram buildFromShaders() failed call to glCreateProgram()";
-        cerr << statusLog << endl;
+        cerr << *this << endl;
         return;
     }
 
@@ -209,7 +238,7 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
         glGetProgramInfoLog(id, errorSize, NULL, errorText);
 
         statusLog = "GLprogram buildFromShaders() failed call to glLinkProgram(): " + string(errorText);
-        cerr << statusLog << endl;
+        cerr << *this << endl;
 
         delete[] errorText;
 
@@ -220,13 +249,15 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
 }
 
 
-
-
 GLint GLprogram::a(const std::string &name) {
     //Check map for value
     auto it = aMap.find(name);
 
     if (it != aMap.end()) {
+        if (it->second == -1) {
+            cerr << *this << " failed to find attribute: " << name << endl;
+        }
+
         return it->second;
     }
 
@@ -236,6 +267,10 @@ GLint GLprogram::a(const std::string &name) {
     }
 
     GLint val = glGetAttribLocation(id, name.c_str());
+
+    if (val == -1) {
+        cerr << *this << " failed to find attribute: " << name << endl;
+    }
 
     aMap[name] = val;
 
@@ -248,6 +283,10 @@ GLint GLprogram::u(const std::string &name) {
     auto it = uMap.find(name);
 
     if (it != uMap.end()) {
+        if (it->second == -1) {
+            cerr << *this << " failed to find uniform: " << name << endl;
+        }
+
         return it->second;
     }
 
@@ -257,6 +296,10 @@ GLint GLprogram::u(const std::string &name) {
     }
 
     GLint val = glGetUniformLocation(id, name.c_str());
+
+    if (val == -1) {
+        cerr << *this << " failed to find uniform: " << name << endl;
+    }
 
     uMap[name] = val;
 

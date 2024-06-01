@@ -47,8 +47,12 @@ int main() {
         return -1;
     }
 
-    auto vs = GLshader<VSHADER>::fromFile("shaders/cubetest.vshader");
-    auto fs = GLshader<FSHADER>::fromFile("shaders/cubetest.fshader");
+
+    auto vs2 = GLshader<VSHADER>::fromFile("shaders/cubetest.vshader");
+    auto fs2 = GLshader<FSHADER>::fromFile("shaders/cubetest.fshader");
+
+    GLshader<VSHADER> vs = move(vs2);
+    GLshader<FSHADER> fs = move(fs2);
 
     cout << vs << endl;
     cout << fs << endl;

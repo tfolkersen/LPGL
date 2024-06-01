@@ -64,9 +64,6 @@ struct GLshader {
         return os;
     }
 
-    ~GLshader() {
-        cleanup();
-    }
 
     void buildFromString(const std::string &shaderCode) {
         cleanup();
@@ -105,16 +102,50 @@ struct GLshader {
             glDeleteShader(id);
         }
 
+        release();
+    }
+
+    void release() {
         id = 0;
         status = GLSHADER_EMPTY;
-        statusLog = "Uninitialized";
+        statusLog.clear();
     }
 
     GLshader() {
         id = 0;
         status = GLSHADER_EMPTY;
-        statusLog = "Uninitialized";
     }
+
+    ~GLshader() {
+        cleanup();
+    }
+
+
+    // Delete: copy constructor, assignment operator
+    GLshader(const GLshader<T> &other) = delete;
+    GLshader<T> &operator=(const GLshader<T> &other) = delete;
+
+    // Implement move semantics: move constructor, move assignment
+    GLshader(GLshader<T> &&other) noexcept {
+        id = other.id;
+        status = other.status;
+        statusLog = move(other.statusLog);
+
+        other.release();
+    }
+
+    GLshader<T> &operator=(GLshader<T> &&other) noexcept {
+        cleanup();
+
+        id = other.id;
+        status = other.status;
+        statusLog = move(other.statusLog);
+
+        other.release();
+
+        return *this;
+    }
+
 };
 
 
@@ -128,8 +159,19 @@ struct GLprogram {
     static GLprogram fromFiles(const std::string &vsFilename, const std::string &fsFilename);
     static GLprogram fromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader);
 
+    void release();
+
     GLprogram();
     ~GLprogram();
+
+    // Delete: copy constructor, assignment operator
+    GLprogram(const GLprogram &other) = delete;
+    GLprogram &operator=(const GLprogram &other) = delete;
+
+    // Implement move semantics: move constructor, move assignment
+    GLprogram(GLprogram &&other) noexcept;
+    GLprogram &operator=(GLprogram &&other) noexcept;
+
 
     friend std::ostream &operator<<(std::ostream &os, const GLprogram &program);
     friend std::ostream &operator<<(std::ostream &os, GLprogram &program);
@@ -145,8 +187,6 @@ struct GLprogram {
 
     std::vector<GLint> as(const std::vector<std::string> &names);
     std::vector<GLint> us(const std::vector<std::string> &names);
-
-
 
   private:
     std::unordered_map<std::string, GLint> aMap;
