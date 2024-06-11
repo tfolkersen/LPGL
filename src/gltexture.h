@@ -2,25 +2,44 @@
 
 #include <GL/glew.h>
 #include <string>
+#include <ostream>
 
-enum TEXTURE_CONSTANTS {
-    TEXTURE_ERROR = -1,
-    TEXTURE_EMPTY = 0,
-    TEXTURE_OK = 1,
+enum GLtextureEnum {
+    GLTEXTURE_ERROR = -1,
+    GLTEXTURE_EMPTY = 0,
+    GLTEXTURE_OK = 1,
 };
 
-struct Texture {
+struct GLtexture {
     GLuint id;
-    int status;
+    GLtextureEnum status;
     std::string statusLog;
 
-    static Texture fromFile(const char *fileName);
+    int w, h, channels;
 
-    //Texture(const void *buffer, int bufferType, int width = 0, int height = 0, int channels = 0);
+    static GLtexture fromFile(const std::string &fileName);
+    static GLtexture fromDimensions(const int &w, const int &h);
+
     void cleanup();
+    void release();
 
-  private:
-    //Texture();
+    GLtexture();
+    ~GLtexture();
+
+    // Delete move constructor, assignment operator
+    GLtexture(const GLtexture &other) = delete;
+    GLtexture &operator=(const GLtexture &other) = delete;
+
+    // Move semantics
+    GLtexture(GLtexture &&other);
+    GLtexture &operator=(GLtexture &&other);
+
+    friend std::ostream &operator<<(std::ostream &os, const GLtexture &tex);
+    friend std::ostream &operator<<(std::ostream &os, GLtexture &tex);
+
+    void buildFromFile(const std::string &fileName);
+    void buildFromDimensions(const int &w, const int &h);
+
 };
 
 

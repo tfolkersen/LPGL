@@ -192,3 +192,6 @@ struct GLprogram {
     std::unordered_map<std::string, GLint> aMap;
     std::unordered_map<std::string, GLint> uMap;
 };
+
+typedef GLshader<VSHADER> GLvshader;
+typedef GLshader<FSHADER> GLfshader;

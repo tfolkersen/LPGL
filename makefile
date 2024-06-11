@@ -34,10 +34,12 @@ CPPFLAGS := $(CPPFLAGSBASE) $(IFLAGS) $(LFLAGS) -lGL
 
 SRC := src
 
-MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o
+MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o $(SRC)/gltexture.o
 
-run: main
-	./main
+run: cubetest2
+	./$<
+
+all: main cubetest2
 
 %.o: %.cpp %.h
 	$(CXX) $< -o $@ $(CPPFLAGS) -c
@@ -51,6 +53,9 @@ main: $(SRC)/main.cpp $(MAINOBJS)
 	$(CXX) $^ -o $@ $(CPPFLAGS)
 
 cubetest: $(SRC)/cubetest.cpp
+	$(CXX) $^ -o $@ $(CPPFLAGS)
+
+cubetest2: $(SRC)/cubetest2.cpp $(MAINOBJS)
 	$(CXX) $^ -o $@ $(CPPFLAGS)
 
 libtest:
@@ -86,9 +91,9 @@ cleandeps:
 
 compdb:
 	-rm compile_commands.json
-	bear -- make main
+	bear -- make all
 
 clean:
-	-rm -rf libtest cubetest $(SRC)/*.o
+	-rm -rf libtest cubetest cubetest2 $(SRC)/*.o
 
 cleanall: cleandeps clean

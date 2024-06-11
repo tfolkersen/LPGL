@@ -3,5 +3,6 @@ libtest
 compile_commands.json
 .cache
 cubetest
+cubetest2
 *.o
 main
