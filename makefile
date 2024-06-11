@@ -34,7 +34,7 @@ CPPFLAGS := $(CPPFLAGSBASE) $(IFLAGS) $(LFLAGS) -lGL
 
 SRC := src
 
-MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o $(SRC)/gltexture.o
+MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o $(SRC)/gltexture.o $(SRC)/glframebuffer.o
 
 run: cubetest2
 	./$<

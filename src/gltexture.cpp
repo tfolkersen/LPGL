@@ -52,10 +52,7 @@ void GLtexture::buildFromFile(const string &fileName) {
     }
 
 
-    // Remember previous: active texture unit, and its handle
-    GLint oldActiveTexture;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &oldActiveTexture);
-
+    // Remember previous: texture handle
     GLint oldBoundTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldBoundTexture);
 
@@ -70,8 +67,7 @@ void GLtexture::buildFromFile(const string &fileName) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
 
     // Restore previous texture state
-    glActiveTexture(oldActiveTexture);
-    glBindTexture(GL_TEXTURE_2D, oldActiveTexture);
+    glBindTexture(GL_TEXTURE_2D, oldBoundTexture);
 
     status = GLTEXTURE_OK;
     statusLog = "Success";
@@ -101,10 +97,7 @@ void GLtexture::buildFromDimensions(const int &_w, const int &_h) { // TODO
     channels = 4;
 
 
-    // Remember previous: active texture unit, and its handle
-    GLint oldActiveTexture;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &oldActiveTexture);
-
+    // Remember previous: texture handle
     GLint oldBoundTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldBoundTexture);
 
@@ -119,8 +112,7 @@ void GLtexture::buildFromDimensions(const int &_w, const int &_h) { // TODO
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _w, _h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
     // Restore previous texture state
-    glActiveTexture(oldActiveTexture);
-    glBindTexture(GL_TEXTURE_2D, oldActiveTexture);
+    glBindTexture(GL_TEXTURE_2D, oldBoundTexture);
 
     status = GLTEXTURE_OK;
     statusLog = "Success";
