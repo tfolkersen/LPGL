@@ -38,4 +38,5 @@ struct GLframebuffer {
     GLenum fbstatus();
 
     void attachColor(const GLtexture &tex);
+    void detachColor();
 };

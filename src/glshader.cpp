@@ -1,7 +1,6 @@
 #include "glshader.h"
 #include "utils.h"
 #include <string>
-#include <sys/types.h>
 
 using namespace std;
 
@@ -52,34 +51,24 @@ bool _buildShader(GLuint &id, GLshaderEnum &status, string &statusLog, int type,
     return true;
 }
 
-
 ////////////////////////////// GLprogram implementation
 
 GLprogram GLprogram::fromStrings(const std::string &vshaderCode, const std::string &fshaderCode) {
     GLprogram program;
-    program.buildFromStrings(vshaderCode, fshaderCode);
+    program.buildFromStrings(vshaderCode, fshaderCode, false);
     return program;
 }
 
 GLprogram GLprogram::fromFiles(const std::string &vsFilename, const std::string &fsFilename) {
     GLprogram program;
-    program.buildFromFiles(vsFilename, fsFilename);
+    program.buildFromFiles(vsFilename, fsFilename, false);
     return program;
 }
 
 GLprogram GLprogram::fromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader) {
     GLprogram program;
-    program.buildFromShaders(vshader, fshader);
+    program.buildFromShaders(vshader, fshader, false);
     return program;
-}
-
-void GLprogram::release() {
-    id = 0;
-    status = GLPROGRAM_EMPTY;
-    statusLog.clear();
-
-    aMap.clear();
-    uMap.clear();
 }
 
 GLprogram::GLprogram() {
@@ -117,15 +106,13 @@ GLprogram &GLprogram::operator=(GLprogram &&other) noexcept {
     return *this;
 }
 
+void GLprogram::release() {
+    id = 0;
+    status = GLPROGRAM_EMPTY;
+    statusLog.clear();
 
-std::ostream &operator<<(std::ostream &os, const GLprogram &program) {
-    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, GLprogram &program) {
-    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
-    return os;
+    aMap.clear();
+    uMap.clear();
 }
 
 void GLprogram::cleanup() {
@@ -140,17 +127,30 @@ void GLprogram::cleanup() {
     release();
 }
 
+std::ostream &operator<<(std::ostream &os, const GLprogram &program) {
+    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
+    return os;
+}
 
-void GLprogram::buildFromStrings(const std::string &vshaderCode, const std::string &fshaderCode) {
-    cleanup();
+std::ostream &operator<<(std::ostream &os, GLprogram &program) {
+    os << "GLprogram " << program.id << " " << program.status << " | " << program.statusLog << " |";
+    return os;
+}
+
+void GLprogram::buildFromStrings(const std::string &vshaderCode, const std::string &fshaderCode, bool _doCleanup) {
+    if (_doCleanup) {
+        cleanup();
+    }
 
     auto vs = GLshader<VSHADER>::fromString(vshaderCode);
     auto fs = GLshader<FSHADER>::fromString(fshaderCode);
-    this->buildFromShaders(vs, fs);
+    this->buildFromShaders(vs, fs, false);
 }
 
-void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string &fsFilename) {
-    cleanup();
+void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string &fsFilename, bool _doCleanup) {
+    if (_doCleanup) {
+        cleanup();
+    }
 
     string vsCode;
     string fsCode;
@@ -158,30 +158,30 @@ void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string 
     bool ok1 = readFile(vsCode, vsFilename);
 
     if (!ok1) {
-        id = 0;
-        status = GLPROGRAM_ERROR;
-        statusLog = "GLprogram buildFromFiles() failed to read vshader file: " + vsFilename;
-        cerr << *this << endl;
-
-        return;
+        statusLog += "GLprogram buildFromFiles() failed to read vshader file: " + vsFilename + " ";
     }
 
     bool ok2 = readFile(fsCode, fsFilename);
 
     if (!ok2) {
+        statusLog += "GLprogram buildFromFiles() failed to read fshader file: " + fsFilename + " ";
+    }
+
+    if (!(ok1 && ok2)) {
         id = 0;
         status = GLPROGRAM_ERROR;
-        statusLog = "GLprogram buildFromFiles() failed to read fshader file: " + fsFilename;
-        cerr << *this << endl;
 
+        cerr << *this << endl;
         return;
     }
 
-    this->buildFromStrings(vsCode, fsCode);
+    this->buildFromStrings(vsCode, fsCode, false);
 }
 
-void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader) {
-    cleanup();
+void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshader<FSHADER> &fshader, bool _doCleanup) {
+    if (_doCleanup) {
+        cleanup();
+    }
 
     bool error = false;
 
@@ -248,7 +248,6 @@ void GLprogram::buildFromShaders(const GLshader<VSHADER> &vshader, const GLshade
     }
 }
 
-
 GLint GLprogram::a(const std::string &name) {
     //Check map for value
     auto it = aMap.find(name);
@@ -306,7 +305,6 @@ GLint GLprogram::u(const std::string &name) {
     return val;
 }
 
-
 vector<GLint> GLprogram::as(const vector<string> &names) {
     vector<GLint> vals;
 
@@ -316,7 +314,6 @@ vector<GLint> GLprogram::as(const vector<string> &names) {
 
     return vals;
 }
-
 
 vector<GLint> GLprogram::us(const vector<string> &names) {
     vector<GLint> vals;

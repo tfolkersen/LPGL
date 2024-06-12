@@ -119,3 +119,24 @@ void GLframebuffer::attachColor(const GLtexture &tex) {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldfb);
     glBindTexture(GL_TEXTURE_2D, oldBoundTexture);
 }
+
+
+void GLframebuffer::detachColor() {
+    // save previously bound framebuffer, bound texture
+    GLint oldfb;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldfb);
+
+    GLint oldBoundTexture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldBoundTexture);
+
+    // attach texture to self
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+
+    // restore old state
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, oldfb);
+    glBindTexture(GL_TEXTURE_2D, oldBoundTexture);
+}
+

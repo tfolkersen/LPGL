@@ -20,9 +20,6 @@ struct GLtexture {
     static GLtexture fromFile(const std::string &fileName);
     static GLtexture fromDimensions(const int &w, const int &h);
 
-    void cleanup();
-    void release();
-
     GLtexture();
     ~GLtexture();
 
@@ -34,12 +31,14 @@ struct GLtexture {
     GLtexture(GLtexture &&other);
     GLtexture &operator=(GLtexture &&other);
 
+    void release();
+    void cleanup();
+
     friend std::ostream &operator<<(std::ostream &os, const GLtexture &tex);
     friend std::ostream &operator<<(std::ostream &os, GLtexture &tex);
 
     void buildFromFile(const std::string &fileName);
     void buildFromDimensions(const int &w, const int &h);
-
 };
 
 
