@@ -14,7 +14,6 @@ struct GLtexture {
     GLuint id;
     GLtextureEnum status;
     std::string statusLog;
-
     int w, h, channels;
 
     static GLtexture fromFile(const std::string &fileName);
@@ -28,8 +27,8 @@ struct GLtexture {
     GLtexture &operator=(const GLtexture &other) = delete;
 
     // Move semantics
-    GLtexture(GLtexture &&other);
-    GLtexture &operator=(GLtexture &&other);
+    GLtexture(GLtexture &&other) noexcept;
+    GLtexture &operator=(GLtexture &&other) noexcept;
 
     void release();
     void cleanup();
@@ -37,11 +36,6 @@ struct GLtexture {
     friend std::ostream &operator<<(std::ostream &os, const GLtexture &tex);
     friend std::ostream &operator<<(std::ostream &os, GLtexture &tex);
 
-    void buildFromFile(const std::string &fileName);
-    void buildFromDimensions(const int &w, const int &h);
+    void buildFromFile(const std::string &fileName, bool _doCleanup = true);
+    void buildFromDimensions(const int &w, const int &h, bool _doCleanup = true);
 };
-
-
-
-
-
