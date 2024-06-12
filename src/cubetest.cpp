@@ -28,7 +28,7 @@
 using namespace std;
 
 //////////////////////////////////////////////////////////// UTILS
-string readFile(const string &fileName) {
+string readFileText(const string &fileName) {
     string fileData;
 
     FILE *f = fopen(fileName.c_str(), "r");
@@ -522,8 +522,8 @@ static void cursorPosCallback(GLFWwindow *win, double xPos, double yPos) {
 GLuint jankBuffer;
 
 void framebufferJank() {
-    Shader vs(readFile("shaders/cubetest-fb.vshader"), GL_VERTEX_SHADER);
-    Shader fs(readFile("shaders/cubetest-fb.fshader"), GL_FRAGMENT_SHADER);
+    Shader vs(readFileText("shaders/cubetest-fb.vshader"), GL_VERTEX_SHADER);
+    Shader fs(readFileText("shaders/cubetest-fb.fshader"), GL_FRAGMENT_SHADER);
 
     ShaderProgram program(vs, fs);
 
@@ -718,8 +718,8 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     //set up shader program
-    string vshaderCode = readFile("shaders/cubetest.vshader");
-    string fshaderCode = readFile("shaders/cubetest.fshader");
+    string vshaderCode = readFileText("shaders/cubetest.vshader");
+    string fshaderCode = readFileText("shaders/cubetest.fshader");
 
     Shader vshader(vshaderCode, GL_VERTEX_SHADER);
     Shader fshader(fshaderCode, GL_FRAGMENT_SHADER);

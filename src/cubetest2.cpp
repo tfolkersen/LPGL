@@ -3,9 +3,11 @@
 
 #include <iostream>
 
-#include "glshader.h"
-#include "gltexture.h"
-#include "glframebuffer.h"
+//#include "glshader.h"
+//#include "gltexture.h"
+//#include "glframebuffer.h"
+
+#include "glstuff.h"
 
 using namespace std;
 

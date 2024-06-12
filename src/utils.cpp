@@ -3,14 +3,13 @@
 
 using namespace std;
 
-
-bool readFile(std::string &dest, const std::string &fileName) {
+bool readFileText(std::string &dest, const std::string &fileName) {
     dest.clear();
 
     FILE *f = fopen(fileName.c_str(), "r");
 
     if (f == NULL) {
-        cerr << "readFile() failed to open file: " << fileName << endl;
+        cerr << "readFileText() failed to open file: " << fileName << endl;
         return false;
     }
 

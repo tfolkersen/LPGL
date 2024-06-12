@@ -16,23 +16,24 @@ struct GLframebuffer {
     GLframebufferEnum status;
     std::string statusLog;
 
+    // no static factory functions unlike GLtexture and others
+
     GLframebuffer();
     ~GLframebuffer();
 
     GLframebuffer(const GLframebuffer &other) = delete;
     GLframebuffer &operator=(const GLframebuffer &other) = delete;
 
-    GLframebuffer(GLframebuffer &&other);
-    GLframebuffer &operator=(GLframebuffer &&other);
-
-    friend std::ostream &operator<<(std::ostream &os, const GLframebuffer &fb);
-    friend std::ostream &operator<<(std::ostream &os, GLframebuffer &fb);
+    GLframebuffer(GLframebuffer &&other) noexcept;
+    GLframebuffer &operator=(GLframebuffer &&other) noexcept;
 
     void release();
     void cleanup();
-    
-    void build();
 
+    friend std::ostream &operator<<(std::ostream &os, const GLframebuffer &fb);
+    friend std::ostream &operator<<(std::ostream &os, GLframebuffer &fb);
+    
+    void build(bool _doCleanup = true);
 
     bool complete();
     GLenum fbstatus();

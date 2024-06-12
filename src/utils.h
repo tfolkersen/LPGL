@@ -6,7 +6,8 @@
 #define DPRINT(x) (std::cout << x << std::endl);
 #define DMACRO(x) (x)
 
-bool readFile(std::string &fileData, const std::string &fileName);
+bool readFileText(std::string &dest, const std::string &fileName);
+// TODO: readFileRaw
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec) {

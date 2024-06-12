@@ -126,12 +126,12 @@ struct GLshader {
         }
 
         std::string sourceCode;
-        bool success = readFile(sourceCode, fileName);
+        bool success = readFileText(sourceCode, fileName);
 
         if (!success) {
             this->id = 0;
             this->status = GLSHADER_ERROR;
-            this->statusLog = "buildFromFile() failed at readFile()";
+            this->statusLog = "buildFromFile() failed at readFileText()";
 
             std::cerr << *this << std::endl;
             return;

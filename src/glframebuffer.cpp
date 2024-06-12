@@ -4,14 +4,14 @@
 using namespace std;
 
 GLframebuffer::GLframebuffer() {
-    build();
+    build(false);
 }
 
 GLframebuffer::~GLframebuffer() {
     cleanup();
 }
 
-GLframebuffer::GLframebuffer(GLframebuffer &&other) {
+GLframebuffer::GLframebuffer(GLframebuffer &&other) noexcept {
     id = other.id;
     status = other.status;
     statusLog = move(other.statusLog);
@@ -19,7 +19,7 @@ GLframebuffer::GLframebuffer(GLframebuffer &&other) {
     other.release();
 }
 
-GLframebuffer &GLframebuffer::operator=(GLframebuffer &&other) {
+GLframebuffer &GLframebuffer::operator=(GLframebuffer &&other) noexcept {
     id = other.id;
     status = other.status;
     statusLog = move(other.statusLog);
@@ -27,17 +27,6 @@ GLframebuffer &GLframebuffer::operator=(GLframebuffer &&other) {
     other.release();
 
     return *this;
-}
-
-
-std::ostream &operator<<(std::ostream &os, const GLframebuffer &fb) {
-    os << "GLframebuffer " << fb.id << " " << fb.status << " | " << fb.statusLog << " |";
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, GLframebuffer &fb) {
-    os << "GLframebuffer " << fb.id << " " << fb.status << " | " << fb.statusLog << " |";
-    return os;
 }
 
 void GLframebuffer::release() {
@@ -58,8 +47,20 @@ void GLframebuffer::cleanup() {
     release();
 }
 
-void GLframebuffer::build() {
-    cleanup();
+std::ostream &operator<<(std::ostream &os, const GLframebuffer &fb) {
+    os << "GLframebuffer " << fb.id << " " << fb.status << " | " << fb.statusLog << " |";
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, GLframebuffer &fb) {
+    os << "GLframebuffer " << fb.id << " " << fb.status << " | " << fb.statusLog << " |";
+    return os;
+}
+
+void GLframebuffer::build(bool _doCleanup) {
+    if (_doCleanup) {
+        cleanup();
+    }
 
     glGenFramebuffers(1, &id);
 
@@ -120,7 +121,6 @@ void GLframebuffer::attachColor(const GLtexture &tex) {
     glBindTexture(GL_TEXTURE_2D, oldBoundTexture);
 }
 
-
 void GLframebuffer::detachColor() {
     // save previously bound framebuffer, bound texture
     GLint oldfb;
@@ -129,7 +129,7 @@ void GLframebuffer::detachColor() {
     GLint oldBoundTexture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldBoundTexture);
 
-    // attach texture to self
+    // attach 0 texture to self
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, id);
     glBindTexture(GL_TEXTURE_2D, 0);
 

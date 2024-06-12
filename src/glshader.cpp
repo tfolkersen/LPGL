@@ -155,13 +155,13 @@ void GLprogram::buildFromFiles(const std::string &vsFilename, const std::string 
     string vsCode;
     string fsCode;
 
-    bool ok1 = readFile(vsCode, vsFilename);
+    bool ok1 = readFileText(vsCode, vsFilename);
 
     if (!ok1) {
         statusLog += "GLprogram buildFromFiles() failed to read vshader file: " + vsFilename + " ";
     }
 
-    bool ok2 = readFile(fsCode, fsFilename);
+    bool ok2 = readFileText(fsCode, fsFilename);
 
     if (!ok2) {
         statusLog += "GLprogram buildFromFiles() failed to read fshader file: " + fsFilename + " ";
