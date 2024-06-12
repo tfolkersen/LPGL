@@ -2,10 +2,6 @@
 #include "stb_image.h"
 #include <iostream>
 
-/*
-    TODO: should glTexParameteri() calls call glGet first?
-*/
-
 using namespace std;
 
 GLtexture GLtexture::fromFile(const string &fileName) {
