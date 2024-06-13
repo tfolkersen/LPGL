@@ -175,7 +175,7 @@ void LPGLctx::freeGLData() {
 
 void LPGLctx::drawTri(const vector<GLfloat> &coords) {
     //cout << coords << endl;
-    glViewport(0, 0, 1024, 768);
+    glViewport(0, 0, 200, 200);
     glUseProgram(tri_pr.id);
     glBindVertexArray(tri_vao);
 

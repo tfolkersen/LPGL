@@ -30,8 +30,8 @@ uniform float u_cy;
 void main() {
     fragColor = vec4(1.0, 1.0, 1.0, 0.0);
 
-    float x = ((v_Pos.x + 1.0) / 2.0) * 1024.0;
-    float y = ((v_Pos.y + 1.0) / 2.0) * 768.0;
+    float x = ((v_Pos.x + 1.0) / 2.0) * 200.0;
+    float y = ((v_Pos.y + 1.0) / 2.0) * 200.0;
 
     vec2 a = vec2(u_ax, u_ay);
     vec2 b = vec2(u_bx, u_by);

@@ -14,7 +14,7 @@ float randf() {
 
 int main() {
     //LPGLctxptr ctx = LPGLctx::fromParameters(200, 768, "lpgl-main");
-    LPGLctxptr ctx = LPGLctx::fromParameters(1024, 768, "lpgl-main");
+    LPGLctxptr ctx = LPGLctx::fromParameters(200, 200, "lpgl-main");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -30,7 +30,7 @@ int main() {
         ctx->drawTri({50.0f, 50.0f, 700.0f, 50.0f, 350.0, 300.0f});
 
         for (int i = 0; i < 10000; i++) {
-            ctx->drawTri({randf() * 1024.0f, randf() * 768.0f, randf() * 1024.0f, randf() * 768.0f, randf() * 1024.0f, randf() * 768.0f});
+            ctx->drawTri({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f});
         }
 
         glFinish();
