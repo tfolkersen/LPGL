@@ -4,6 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "glstuff.h"
 
 enum LPGLctxEnum {
     LPGLCTX_ERROR = -1,
@@ -28,6 +31,10 @@ struct LPGLctx {
     LPGLctx(const LPGLctx &other) = delete;
     LPGLctx &operator=(const LPGLctx &other) = delete;
 
+    /*
+        TODO probably don't need move semantics either because the static
+        constructor function returns a unique_ptr
+    */
     LPGLctx(LPGLctx &&other) noexcept;
     LPGLctx &operator=(LPGLctx &&other) noexcept;
 
@@ -47,7 +54,20 @@ struct LPGLctx {
     void initGLData();
     void freeGLData();
 
-    // Private data
+    ////////////////////////////// Private data
+    // Buffers
+    GLuint fullBox_vbuff;
+    GLuint boxLike_ebuff;
+
+    // VAOs
+    GLuint tri_vao;
+
+    // Programs
+    GLprogram tri_pr;
+
+  public:
+    void drawTri(const std::vector<GLfloat> &coords);
+
 
 };
 
