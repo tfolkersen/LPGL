@@ -1,8 +1,8 @@
-libs/*
-libtest
-compile_commands.json
+/libs
+/libtest
+/compile_commands.json
 .cache
-cubetest
-cubetest2
+/cubetest
+/cubetest2
 *.o
-main
+/main
