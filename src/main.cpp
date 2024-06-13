@@ -4,12 +4,24 @@
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
+#include <functional>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 using namespace std;
 
 float randf() {
     return ((float) rand()) / ((float) RAND_MAX);
 }
+
+function<void ()> _mainLoop;
+
+void mainLoop() {
+    _mainLoop();
+}
+
 
 
 int main() {
@@ -19,9 +31,9 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //TODO make this less jank
     glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
-    while (glfwWindowShouldClose(ctx->window) != GLFW_TRUE && glfwGetKey(ctx->window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+
+    _mainLoop = [&]() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         chrono::time_point start = chrono::high_resolution_clock::now();
@@ -43,8 +55,18 @@ int main() {
 
         glfwSwapBuffers(ctx->window);
         glfwPollEvents();
-    }
+    };
 
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(mainLoop, 0, true);
+#else
+    //TODO make this less jank: should use callback
+    while (glfwWindowShouldClose(ctx->window) != GLFW_TRUE && glfwGetKey(ctx->window, GLFW_KEY_ESCAPE) != GLFW_PRESS) {
+        mainLoop();
+    }
+#endif
+
+    
 
     ctx->cleanup();
     LPGLctx::terminate();

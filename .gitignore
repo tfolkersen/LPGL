@@ -5,4 +5,9 @@
 /cubetest
 /cubetest2
 *.o
+*.oe
+/*.data
+/*.html
+/*.js
+/*.wasm
 /main
