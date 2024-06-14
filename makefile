@@ -21,7 +21,11 @@ LGLM :=
 
 LUADIR := $(LIBDIR)/lua-5.4.6
 ILUA := -isystem $(LUADIR)/src
-LLUA := 
+LLUA := -L $(LUADIR)/src -llua
+
+LUADIR_EM := $(LIBDIR)/lua-5.4.6-em
+ILUA_EM := -isystem $(LUADIR_EM)/src
+LLUA_EM := -L $(LUADIR_EM)/src -llua
 
 STBDIR := $(LIBDIR)/stb
 ISTB := -isystem $(STBDIR)
@@ -32,11 +36,11 @@ LSTB_EM := -L $(STBDIR)/emcc -lstb_image
 IFLAGSBASE := $(IGLM)
 LFLAGSBASE := $(LGLM)
 
-IFLAGS := $(IFLAGSBASE) $(IGLEW) $(IGLFW) $(ISTB)
-LFLAGS := $(LFLAGSBASE) $(LGLEW) $(LGLFW) $(LSTB)
+IFLAGS := $(IFLAGSBASE) $(IGLEW) $(IGLFW) $(ISTB) $(ILUA)
+LFLAGS := $(LFLAGSBASE) $(LGLEW) $(LGLFW) $(LSTB) $(LLUA)
 
-IFLAGS_EM := $(IFLAGSBASE) $(ISTB_EM)
-LFLAGS_EM := $(LFLAGSBASE) $(LSTB_EM)
+IFLAGS_EM := $(IFLAGSBASE) $(ISTB_EM) $(ILUA_EM)
+LFLAGS_EM := $(LFLAGSBASE) $(LSTB_EM) $(LLUA_EM)
 
 CPPFLAGSBASE := --std=c++17 -O3 -Wall -Wextra -lGL
 CPPFLAGS := $(CPPFLAGSBASE) $(IFLAGS) $(LFLAGS)
@@ -103,7 +107,8 @@ deps:
 	make -C $(GLMDIR)/glm/build -j $(MAKETHREADS)
 	echo "#warning glm dummy file found" > $(GLMDIR)/glm/dummy.hpp
 	#Build Lua
-	make -C $(LUADIR) -j $(MAKETHREADS)
+	make -C $(LUADIR)/src -j $(MAKETHREADS)
+	make -C $(LUADIR_EM)/src -j $(MAKETHREADS) CC=" emcc -std=gnu99"
 	#Build stb_image
 	make -C $(STBDIR) -j $(MAKETHREADS) CXX=$(CXX) CXX_EM=$(CXX_EM) CPPFLAGS="$(CPPFLAGSBASE)" CPPFLAGS_EM="$(CPPFLAGSBASE_EM)"
 	#Done
@@ -113,7 +118,8 @@ cleandeps:
 	-make -C $(GLEWDIR) clean
 	-make -C $(GLFWDIR)/build clean
 	-make -C $(GLMDIR)/glm clean
-	-make -C $(LUADIR) clean
+	-make -C $(LUADIR)/src clean
+	-make -C $(LUADIR_EM)/src clean
 	-make -C $(STBDIR) clean
 	-rm -rf $(GLFWDIR)/build $(GLMDIR)/glm/build
 

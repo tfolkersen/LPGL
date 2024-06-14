@@ -6,6 +6,12 @@
 #include <chrono>
 #include <functional>
 
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -25,6 +31,18 @@ void mainLoop() {
 
 
 int main() {
+    {
+        cout << "Running Lua code, should print a message..." << endl;
+        lua_State *L = luaL_newstate();
+
+        luaL_openlibs(L);
+        string code = "print(\"Hello from Lua: \" .. (6 + 1 + 4))";
+        luaL_loadbuffer(L, code.c_str(), code.size(), "line");
+        lua_pcall(L, 0, 0, 0);
+        lua_close(L);
+        cout << "Done Lua code" << endl;
+    }
+
     //LPGLctxptr ctx = LPGLctx::fromParameters(200, 768, "lpgl-main");
     LPGLctxptr ctx = LPGLctx::fromParameters(200, 200, "lpgl-main");
 
@@ -51,7 +69,7 @@ int main() {
         auto ms = chrono::duration_cast<chrono::milliseconds>(end - start);
 
 
-        cout << "DONE " << ms.count() << endl;
+        //cout << "DONE " << ms.count() << endl;
 
         glfwSwapBuffers(ctx->window);
         glfwPollEvents();
