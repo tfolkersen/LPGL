@@ -28,8 +28,6 @@ void mainLoop() {
     _mainLoop();
 }
 
-
-
 int main() {
     {
         cout << "Running Lua code, should print a message..." << endl;

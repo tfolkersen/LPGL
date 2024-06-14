@@ -179,6 +179,10 @@ void LPGLctx::drawTri(const vector<GLfloat> &coords) {
     glUseProgram(tri_pr.id);
     glBindVertexArray(tri_vao);
 
+
+    glVertexAttribPointer(tri_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(tri_pr.a("a_Color"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *) (2 * sizeof(GLfloat)));
+
     GLfloat ax = -1;
     GLfloat ay = -1;
     GLfloat bx = -1;

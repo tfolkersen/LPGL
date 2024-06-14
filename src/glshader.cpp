@@ -253,10 +253,6 @@ GLint GLprogram::a(const std::string &name) {
     auto it = aMap.find(name);
 
     if (it != aMap.end()) {
-        if (it->second == -1) {
-            cerr << *this << " failed to find attribute: " << name << endl;
-        }
-
         return it->second;
     }
 
@@ -282,10 +278,6 @@ GLint GLprogram::u(const std::string &name) {
     auto it = uMap.find(name);
 
     if (it != uMap.end()) {
-        if (it->second == -1) {
-            cerr << *this << " failed to find uniform: " << name << endl;
-        }
-
         return it->second;
     }
 
