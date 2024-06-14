@@ -53,11 +53,11 @@ SRC := src
 MAINOBJS := $(SRC)/glshader.o $(SRC)/utils.o $(SRC)/gltexture.o $(SRC)/glframebuffer.o $(SRC)/lpglctx.o
 MAINOBJS_EM := $(SRC)/glshader.oe $(SRC)/utils.oe $(SRC)/gltexture.oe $(SRC)/glframebuffer.oe $(SRC)/lpglctx.oe
 
-run: cxxtargets #cxxtargets_em
+run: cxxtargets emxxtargets
 	./main
 
 cxxtargets: main
-cxxtargets_em: main.html
+emxxtargets: main.html
 
 
 all: main cubetest2
