@@ -272,7 +272,6 @@ GLint GLprogram::a(const std::string &name) {
     return val;
 }
 
-
 GLint GLprogram::u(const std::string &name) {
     //Check map for value
     auto it = uMap.find(name);
