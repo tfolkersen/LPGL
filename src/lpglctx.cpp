@@ -1,25 +1,39 @@
 #include "lpglctx.h"
 #include "glshader.h"
 #include <GLFW/glfw3.h>
+#include <cstdlib>
 #include <iostream>
 
 using namespace std;
 
-
+bool LPGLctx::exitHandled = false;
 
 GLctx::GLctx() {
 }
 
 GLctx::~GLctx() {
-    cout << "GLCTX DEST" << endl;
     if (window != NULL) {
         glfwDestroyWindow(window);
     }
 }
 
+void lpglExitHandler() {
+    glfwTerminate();
+}
+
+// Private constructor
+LPGLctx::LPGLctx() {
+    if (!exitHandled) {
+        atexit(lpglExitHandler);
+        exitHandled = true;
+    }
+
+    status = LPGLCTX_EMPTY;
+}
+
 unique_ptr<LPGLctx> LPGLctx::fromParameters(const int w, const int h, const char *windowTitle) {
     unique_ptr<LPGLctx> ptr(new LPGLctx());
-    ptr->buildFromParameters(w, h, windowTitle, false);
+    ptr->buildFromParameters(w, h, windowTitle);
     return ptr;
 }
 
@@ -27,27 +41,8 @@ void LPGLctx::terminate() {
     glfwTerminate();
 }
 
-// Private constructor
-LPGLctx::LPGLctx() {
-    window = NULL;
-    status = LPGLCTX_EMPTY;
-}
-
 LPGLctx::~LPGLctx() {
-    cout << "LPGLCTX DEST" << endl;
     cleanup();
-}
-
-void LPGLctx::cleanup() {
-    makeCurrent();
-
-    if (status == LPGLCTX_EMPTY) {
-        return;
-    }
-
-    if (status == LPGLCTX_OK) {
-        freeGLData();
-    }
 }
 
 ostream &operator<<(ostream &os, const LPGLctx &ctx) {
@@ -58,43 +53,6 @@ ostream &operator<<(ostream &os, const LPGLctx &ctx) {
 ostream &operator<<(ostream &os, LPGLctx &ctx) {
     os << "LPGLctx " << ((int *) ctx.window) << " " << ctx.status << " | " << ctx.statusLog << " |";
     return os;
-}
-
-void LPGLctx::buildFromParameters(const int w, const int h, const char *windowTitle, bool _doCleanup) {
-    if (_doCleanup) {
-        cleanup();
-    }
-
-    if (glfwInit() != GLFW_TRUE) {
-        status = LPGLCTX_ERROR;
-        statusLog = "buildFromParameters() failed call to glfwInit()";
-        cerr << *this << endl;
-        return;
-    }
-
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 1);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-
-    window = glfwCreateWindow(w, h, windowTitle, NULL, NULL);
-
-    if (window == NULL) {
-        status = LPGLCTX_ERROR;
-        statusLog = "buildFromParameters() failed call to glfwCreateWindow()";
-        cerr << *this << endl;
-        return;
-    }
-    
-    glfwMakeContextCurrent(window);
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-
-    status = LPGLCTX_OK;
-    statusLog = "Success";
-
-    makeCurrent();
-    initGLData();
 }
 
 void LPGLctx::makeCurrent() {
@@ -108,7 +66,6 @@ void LPGLctx::makeCurrent() {
         cerr << "Warning: LPGLctx::makeCurrent() failed call to glewInit()" << endl;
     }
 }
-
 
 GLuint LPGLctx::newGlBuffer() {
     GLuint buff;
@@ -164,7 +121,49 @@ bool LPGLctx::deleteGlVertexArray(GLuint vao) {
     return found;
 }
 
- ////////////////////////////// Private functions
+void LPGLctx::cleanup() {
+    if (status == LPGLCTX_EMPTY) {
+        return;
+    }
+
+    if (status == LPGLCTX_OK) {
+        makeCurrent();
+        freeGLData();
+    }
+}
+
+void LPGLctx::buildFromParameters(const int w, const int h, const char *windowTitle) {
+    if (glfwInit() != GLFW_TRUE) {
+        status = LPGLCTX_ERROR;
+        statusLog = "buildFromParameters() failed call to glfwInit()";
+        cerr << *this << endl;
+        return;
+    }
+
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+
+    window = glfwCreateWindow(w, h, windowTitle, NULL, NULL);
+
+    if (window == NULL) {
+        status = LPGLCTX_ERROR;
+        statusLog = "buildFromParameters() failed call to glfwCreateWindow()";
+        cerr << *this << endl;
+        return;
+    }
+    
+    glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+
+    status = LPGLCTX_OK;
+    statusLog = "Success";
+
+    makeCurrent();
+    initGLData();
+}
 
 void LPGLctx::initGLData() {
     const GLfloat fullBox_data[] = {

@@ -40,13 +40,28 @@ struct LPGLctx: public GLctx {
     LPGLctxEnum status;
     std::string statusLog;
 
-    static std::unique_ptr<LPGLctx> fromParameters(const int w, const int h, const char *windowTitle);
-    static void terminate();
+  private:
+    // Buffers
+    GLuint fullBox_vbuff;
+    GLuint boxLike_ebuff;
+    std::unordered_set<GLuint> glBuffers;
+    std::unordered_set<GLuint> glVertexArrays;
+    
+    // VAOs
+    GLuint tri_vao;
+
+    // Programs
+    GLprogram tri_pr;
+
+    static bool exitHandled;
 
   private:
     LPGLctx();
 
   public:
+    static std::unique_ptr<LPGLctx> fromParameters(const int w, const int h, const char *windowTitle);
+    static void terminate();
+
     ~LPGLctx();
 
     // No copying
@@ -57,12 +72,9 @@ struct LPGLctx: public GLctx {
     LPGLctx(LPGLctx &&other) = delete;
     LPGLctx &operator=(LPGLctx &&other) = delete;
 
-    void cleanup();
-
+  public:
     friend std::ostream &operator<<(std::ostream &os, const LPGLctx &ctx);
     friend std::ostream &operator<<(std::ostream &os, LPGLctx &ctx);
-
-    void buildFromParameters(const int w, const int h, const char *windowTitle, bool _doCleanup = true);
 
     void makeCurrent();
 
@@ -73,24 +85,14 @@ struct LPGLctx: public GLctx {
     bool deleteGlVertexArray(GLuint vao);
 
   private:
+    void cleanup();
+    void buildFromParameters(const int w, const int h, const char *windowTitle);
+
     void moveFrom(LPGLctx &&other, bool _doCleanup = true);
 
     void initGLData();
     void freeGLData();
 
-    ////////////////////////////// Private data
-    // Buffers
-    GLuint fullBox_vbuff;
-    GLuint boxLike_ebuff;
-
-    std::unordered_set<GLuint> glBuffers;
-    std::unordered_set<GLuint> glVertexArrays;
-
-    // VAOs
-    GLuint tri_vao;
-
-    // Programs
-    GLprogram tri_pr;
 
   public:
     void drawTri(const std::vector<GLfloat> &coords);
