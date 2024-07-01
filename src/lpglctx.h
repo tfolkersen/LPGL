@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "glstuff.h"
 
@@ -13,6 +14,11 @@ enum LPGLctxEnum {
     LPGLCTX_EMPTY = 0,
     LPGLCTX_OK = 1,
 };
+
+/*
+    TODO: LPGLctx should inherit from a GLctx struct so that its members are freed on deconstruction, before the GLctx is freed
+*/
+
 
 struct LPGLctx {
     GLFWwindow *window;
@@ -48,6 +54,12 @@ struct LPGLctx {
 
     void makeCurrent();
 
+    GLuint newGlBuffer();
+    GLuint newGlVertexArray();
+
+    bool deleteGlBuffer(GLuint buff);
+    bool deleteGlVertexArray(GLuint vao);
+
   private:
     void moveFrom(LPGLctx &&other, bool _doCleanup = true);
 
@@ -58,6 +70,9 @@ struct LPGLctx {
     // Buffers
     GLuint fullBox_vbuff;
     GLuint boxLike_ebuff;
+
+    std::unordered_set<GLuint> glBuffers;
+    std::unordered_set<GLuint> glVertexArrays;
 
     // VAOs
     GLuint tri_vao;

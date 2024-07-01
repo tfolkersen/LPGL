@@ -38,9 +38,13 @@ void LPGLctx::release() {
     window = NULL;
     status = LPGLCTX_EMPTY;
     statusLog.clear();
+    glBuffers.clear();
+    glVertexArrays.clear();
 }
 
 void LPGLctx::cleanup() {
+    makeCurrent();
+
     if (status == LPGLCTX_EMPTY) {
         return;
     }
@@ -113,6 +117,60 @@ void LPGLctx::makeCurrent() {
 }
 
 
+GLuint LPGLctx::newGlBuffer() {
+    GLuint buff;
+    glGenBuffers(1, &buff);
+
+    if (buff <= 0) {
+        cerr << "LPGLctx newGlBuffer() failed call to glGenBuffers(), got: " << buff << endl;
+    }
+
+    glBuffers.insert(buff);
+
+    return buff;
+}
+
+GLuint LPGLctx::newGlVertexArray() {
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+
+    if (vao <= 0) {
+        cerr << "LPGLctx newGlVertexArray() failed call to glGenVertexArrays(), got: " << vao << endl;
+    }
+
+    glVertexArrays.insert(vao);
+
+    return vao;
+}
+
+bool LPGLctx::deleteGlBuffer(GLuint buff) {
+    auto it = glBuffers.find(buff);
+
+    bool found = false;
+    if (it != glBuffers.end()) {
+        found = true;
+        glBuffers.erase(it);
+    }
+
+    glDeleteBuffers(1, &buff);
+
+    return found;
+}
+
+bool LPGLctx::deleteGlVertexArray(GLuint vao) {
+    auto it = glVertexArrays.find(vao);
+
+    bool found = false;
+    if (it != glVertexArrays.end()) {
+        found = true;
+        glVertexArrays.erase(it);
+    }
+
+    glDeleteVertexArrays(1, &vao);
+
+    return found;
+}
+
  ////////////////////////////// Private functions
 void LPGLctx::moveFrom(LPGLctx &&other, bool _doCleanup) {
     if (_doCleanup) {
@@ -123,8 +181,13 @@ void LPGLctx::moveFrom(LPGLctx &&other, bool _doCleanup) {
     status = other.status;
     statusLog = move(other.status);
 
+    glBuffers = move(other.glBuffers);
+    glVertexArrays = move(other.glVertexArrays);
+
     other.release();
 }
+
+
 
 void LPGLctx::initGLData() {
     const GLfloat fullBox_data[] = {
@@ -164,9 +227,15 @@ void LPGLctx::initGLData() {
 }
 
 void LPGLctx::freeGLData() {
-    glDeleteBuffers(1, &fullBox_vbuff);
+    for (GLuint buff : glBuffers) {
+        glDeleteBuffers(1, &buff);
+    }
+    glBuffers.clear();
 
-    glDeleteBuffers(1, &boxLike_ebuff);
+    for (GLuint vao : glVertexArrays) {
+        glDeleteVertexArrays(1, &vao);
+    }
+    glVertexArrays.clear();
 
     tri_pr.cleanup();
 
