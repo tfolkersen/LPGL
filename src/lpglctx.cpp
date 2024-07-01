@@ -5,6 +5,18 @@
 
 using namespace std;
 
+
+
+GLctx::GLctx() {
+}
+
+GLctx::~GLctx() {
+    cout << "GLCTX DEST" << endl;
+    if (window != NULL) {
+        glfwDestroyWindow(window);
+    }
+}
+
 unique_ptr<LPGLctx> LPGLctx::fromParameters(const int w, const int h, const char *windowTitle) {
     unique_ptr<LPGLctx> ptr(new LPGLctx());
     ptr->buildFromParameters(w, h, windowTitle, false);
@@ -22,24 +34,8 @@ LPGLctx::LPGLctx() {
 }
 
 LPGLctx::~LPGLctx() {
+    cout << "LPGLCTX DEST" << endl;
     cleanup();
-}
-
-LPGLctx::LPGLctx(LPGLctx &&other) noexcept {
-    moveFrom(forward<LPGLctx>(other), false);
-}
-
-LPGLctx &LPGLctx::operator=(LPGLctx &&other) noexcept {
-    moveFrom(forward<LPGLctx>(other), true);
-    return *this;
-}
-
-void LPGLctx::release() {
-    window = NULL;
-    status = LPGLCTX_EMPTY;
-    statusLog.clear();
-    glBuffers.clear();
-    glVertexArrays.clear();
 }
 
 void LPGLctx::cleanup() {
@@ -51,10 +47,7 @@ void LPGLctx::cleanup() {
 
     if (status == LPGLCTX_OK) {
         freeGLData();
-        glfwDestroyWindow(window);
     }
-
-    release();
 }
 
 ostream &operator<<(ostream &os, const LPGLctx &ctx) {
@@ -172,22 +165,6 @@ bool LPGLctx::deleteGlVertexArray(GLuint vao) {
 }
 
  ////////////////////////////// Private functions
-void LPGLctx::moveFrom(LPGLctx &&other, bool _doCleanup) {
-    if (_doCleanup) {
-        cleanup();
-    }
-
-    window = other.window;
-    status = other.status;
-    statusLog = move(other.status);
-
-    glBuffers = move(other.glBuffers);
-    glVertexArrays = move(other.glVertexArrays);
-
-    other.release();
-}
-
-
 
 void LPGLctx::initGLData() {
     const GLfloat fullBox_data[] = {
@@ -202,19 +179,19 @@ void LPGLctx::initGLData() {
         2, 3, 0,
     };
 
-    glGenBuffers(1, &fullBox_vbuff);
+    fullBox_vbuff = newGlBuffer();
     glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
     glBufferData(GL_ARRAY_BUFFER, sizeof(fullBox_data), fullBox_data, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &boxLike_ebuff);
+    boxLike_ebuff = newGlBuffer();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(boxLike_elems), boxLike_elems, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     tri_pr = GLprogram::fromFiles("shaders/main/tri.vs", "shaders/main/tri.fs");
 
-    glGenVertexArrays(1, &tri_vao);
+    tri_vao = newGlVertexArray();
     glBindVertexArray(tri_vao);
     glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
@@ -236,10 +213,6 @@ void LPGLctx::freeGLData() {
         glDeleteVertexArrays(1, &vao);
     }
     glVertexArrays.clear();
-
-    tri_pr.cleanup();
-
-    glDeleteVertexArrays(1, &tri_vao);
 }
 
 void LPGLctx::drawTri(const vector<GLfloat> &coords) {

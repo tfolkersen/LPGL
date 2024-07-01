@@ -20,8 +20,23 @@ enum LPGLctxEnum {
 */
 
 
-struct LPGLctx {
+struct GLctx {
     GLFWwindow *window;
+
+    GLctx();
+    ~GLctx();
+
+    // No copying
+    GLctx(const GLctx &other) = delete;
+    GLctx &operator=(const GLctx &other) = delete;
+
+    // No moving
+    GLctx(GLctx &&other) = delete;
+    GLctx &operator=(GLctx &&other) = delete;
+};
+
+
+struct LPGLctx: public GLctx {
     LPGLctxEnum status;
     std::string statusLog;
 
@@ -34,17 +49,14 @@ struct LPGLctx {
   public:
     ~LPGLctx();
 
+    // No copying
     LPGLctx(const LPGLctx &other) = delete;
     LPGLctx &operator=(const LPGLctx &other) = delete;
 
-    /*
-        TODO probably don't need move semantics either because the static
-        constructor function returns a unique_ptr
-    */
-    LPGLctx(LPGLctx &&other) noexcept;
-    LPGLctx &operator=(LPGLctx &&other) noexcept;
+    // No moving
+    LPGLctx(LPGLctx &&other) = delete;
+    LPGLctx &operator=(LPGLctx &&other) = delete;
 
-    void release();
     void cleanup();
 
     friend std::ostream &operator<<(std::ostream &os, const LPGLctx &ctx);

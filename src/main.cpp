@@ -84,6 +84,7 @@ int main() {
 
     
 
+    // TODO CHECK HERE
     ctx->cleanup();
     LPGLctx::terminate();
     return 0;
