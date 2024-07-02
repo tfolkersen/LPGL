@@ -122,10 +122,6 @@ bool LPGLctx::deleteGlVertexArray(GLuint vao) {
 }
 
 void LPGLctx::cleanup() {
-    if (status == LPGLCTX_EMPTY) {
-        return;
-    }
-
     if (status == LPGLCTX_OK) {
         makeCurrent();
         freeGLData();
