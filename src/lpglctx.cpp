@@ -196,6 +196,16 @@ void LPGLctx::initGLData() {
     glVertexAttribPointer(tri_pr.a("a_Color"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *) (2 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
+    // drawPoly
+    poly_pr = GLprogram::fromFiles("shaders/main/poly.vs", "shaders/main/poly.fs");
+
+    poly_vao = newGlVertexArray();
+    glBindVertexArray(poly_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
+    glEnableVertexAttribArray(poly_pr.a("a_Pos"));
+    glVertexAttribPointer(poly_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+    glBindVertexArray(0);
 }
 
 void LPGLctx::freeGLData() {
@@ -239,6 +249,19 @@ void LPGLctx::drawTri(const vector<GLfloat> &coords) {
     glUniform1f(tri_pr.u("u_by"), by);
     glUniform1f(tri_pr.u("u_cx"), cx);
     glUniform1f(tri_pr.u("u_cy"), cy);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+}
+
+void LPGLctx::drawPoly(const vector<GLfloat> &coords) {
+    //cout << coords << endl;
+    glViewport(0, 0, 200, 200);
+    glUseProgram(poly_pr.id);
+    glBindVertexArray(poly_vao);
+
+    glUniform1fv(poly_pr.u("u_Tri"), 6, coords.data());
+    glUniform1f(poly_pr.u("u_Border"), 5.0f);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

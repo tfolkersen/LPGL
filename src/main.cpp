@@ -49,6 +49,7 @@ int main() {
 
     glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
 
+    /*
     _mainLoop = [&]() {
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -68,6 +69,19 @@ int main() {
 
 
         //cout << "DONE " << ms.count() << endl;
+
+        glfwSwapBuffers(ctx->window);
+        glfwPollEvents();
+    };
+    */
+
+    _mainLoop = [&]() {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        //ctx->drawPoly({50.0, 50.0, 100.0, 100.0, 150.0, 25.0});
+        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0});
+
+        ctx->drawPoly({120, 120, 190, 180, 170, 60});
 
         glfwSwapBuffers(ctx->window);
         glfwPollEvents();

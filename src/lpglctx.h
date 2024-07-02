@@ -49,9 +49,11 @@ struct LPGLctx: public GLctx {
     
     // VAOs
     GLuint tri_vao;
+    GLuint poly_vao;
 
     // Programs
     GLprogram tri_pr;
+    GLprogram poly_pr;
 
     static bool exitHandled;
 
@@ -96,6 +98,7 @@ struct LPGLctx: public GLctx {
 
   public:
     void drawTri(const std::vector<GLfloat> &coords);
+    void drawPoly(const std::vector<GLfloat> &coords);
 
 
 };
