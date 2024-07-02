@@ -2,9 +2,10 @@
 precision highp float;
 
 uniform mat4 u_Mat1;
-uniform vec2 u_Center;
+//uniform vec2 u_Center;
+uniform mat4 u_Camera;
 
-uniform mat4 u_RotScale;
+//uniform mat4 u_RotScale;
 
 in vec2 a_Pos;
 
@@ -19,13 +20,14 @@ void main() {
     vec4 pos = vec4(x, y, 0.0, 1.0);
 
 
+/*
     pos -= vec4(u_Center, 0.0, 0.0);
     pos = u_RotScale * pos;
     pos += vec4(u_Center, 0.0, 0.0);
+*/
+
+    pos = u_Camera * pos;
     
-
-
     v_Pos = pos.xy;
 }
-
 

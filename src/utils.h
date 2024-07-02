@@ -42,3 +42,16 @@ std::ostream &operator<<(std::ostream &os, std::vector<T> &vec) {
 
     return os;
 }
+
+template <class T>
+T constrain(const T &low, const T &val, const T &high) {
+    if (val < low) {
+        return low;
+    }
+
+    if (val > high) {
+        return high;
+    }
+
+    return val;
+}

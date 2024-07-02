@@ -2,10 +2,12 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/ext/matrix_float4x4.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <glm/glm.hpp>
 
 #include "glstuff.h"
 
@@ -100,6 +102,10 @@ struct LPGLctx: public GLctx {
     void drawTri(const std::vector<GLfloat> &coords);
     //void drawPoly(const std::vector<GLfloat> &coords);
 
+
+
+    glm::mat4 cameraMatrix;
+    void setCamera(GLfloat x = 0.0f, GLfloat y = 0.0f, GLfloat angle = 0.0f, GLfloat sx = 1.0f, GLfloat sy = 1.0f);
 
     void drawPoly(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
 
