@@ -2,7 +2,15 @@
 #include "glshader.h"
 #include <GLFW/glfw3.h>
 #include <cstdlib>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/trigonometric.hpp>
 #include <iostream>
+
+#include <glm/glm.hpp>
+#include <glm/common.hpp>
+#include <glm/ext.hpp>
 
 using namespace std;
 
@@ -254,7 +262,7 @@ void LPGLctx::drawTri(const vector<GLfloat> &coords) {
 
 }
 
-void LPGLctx::drawPoly(const vector<GLfloat> &coords) {
+void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex, float scaley) {
     //cout << coords << endl;
     glViewport(0, 0, 200, 200);
     glUseProgram(poly_pr.id);
@@ -262,6 +270,29 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords) {
 
     glUniform1fv(poly_pr.u("u_Tri"), 6, coords.data());
     glUniform1f(poly_pr.u("u_Border"), 5.0f);
+
+
+    GLfloat center[2];
+
+    center[0] = (coords[0] + coords[2] + coords[4]) / 3.0;
+    center[1] = (coords[1] + coords[3] + coords[5]) / 3.0;
+
+    glUniform2fv(poly_pr.u("u_Center"), 1, &center[0]);
+
+    glm::mat4 u_RotScale = glm::rotate(glm::identity<glm::mat4>(), glm::radians(angle), glm::vec3(0.0, 0.0, -1.0));
+    u_RotScale = glm::scale(u_RotScale, glm::vec3(1.0 / scalex, 1.0 / scaley, 1.0f));
+
+    glUniformMatrix4fv(poly_pr.u("u_RotScale"), 1, false, &u_RotScale[0][0]);
+
+
+    glm::mat4 u_Mat1 = glm::identity<glm::mat4>();
+
+    //u_Mat1 = glm::rotate(u_Mat1, (float) glm::radians(5.0), glm::vec3(0.0, 0.0, 1.0));
+    //u_Mat1 = glm::translate(u_Mat1, {-30.0, 0.0, 0.0});
+
+
+    glUniformMatrix4fv(poly_pr.u("u_Mat1"), 1, false, &u_Mat1[0][0]);
+
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

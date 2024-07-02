@@ -98,7 +98,10 @@ struct LPGLctx: public GLctx {
 
   public:
     void drawTri(const std::vector<GLfloat> &coords);
-    void drawPoly(const std::vector<GLfloat> &coords);
+    //void drawPoly(const std::vector<GLfloat> &coords);
+
+
+    void drawPoly(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
 
 
 };

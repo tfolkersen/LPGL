@@ -75,13 +75,38 @@ int main() {
     };
     */
 
+
+    float angle = 0.0f;
+    float sx = 0.0;
+    float sy = 0.0;
+
     _mainLoop = [&]() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         //ctx->drawPoly({50.0, 50.0, 100.0, 100.0, 150.0, 25.0});
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0});
+        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.0, 1.0);
+        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.5, 1.5);
+        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 2.0, 2.0);
 
-        ctx->drawPoly({120, 120, 190, 180, 170, 60});
+        ctx->drawPoly({120, 120, 190, 180, 170, 60}, 0.0, 1.0, 1.0);
+
+
+
+
+
+
+
+
+
+
+
+        sx += 0.05;
+        sx = sx > 3.0 ? 1.0 : sx;
+
+        sy += 0.05;
+        sy = sy > 3.0 ? 1.0 : sy;
+
+        angle += 0.4f;
 
         glfwSwapBuffers(ctx->window);
         glfwPollEvents();
