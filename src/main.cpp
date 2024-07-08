@@ -203,21 +203,29 @@ int main() {
         };
 
 
+        static unsigned int minCount = ((unsigned int) 0) -1;
+
         int elapsed = 0;
         int count = 0;
         static double countAvg = 0;
         static int frameNo = 1;
 
-        while ((elapsed = getTime()) < 17) {
+        while ((elapsed = getTime()) < 1000 / 30) {
             //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
-            ctx->drawPoly({0.0, 50.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
             //ctx->drawPoly({}, angle, 1.0, 1.0);
             //ctx->drawPoly({}, angle, 1.0, 1.0);
             count++;
+
+
+            ctx->drawPoly({0.0, 0.0, 0.0, 199.0, 199.0, 199.0}, angle, 1.0, 1.0);
+            //ctx->drawPoly({0.0, 50.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
         }
 
+        minCount = min(minCount, (unsigned int) count);
+
+
         countAvg = ((countAvg * (frameNo - 1)) + (double) count) / ((double) frameNo);
-        cout << count << " triangles in " << elapsed << " ms " << countAvg << " (average)" << endl;
+        cout << count << " triangles in " << elapsed << " ms " << countAvg << " (average) " << minCount << " (min) "<< endl;
         frameNo++;
 
         glFinish();
