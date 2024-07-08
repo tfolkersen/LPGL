@@ -327,6 +327,7 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
     setFillp(0x102040810204080);
     setFillp(0x0);
+    setFillp(0x0000000000042f2);
 
 
     glUniform1iv(poly_pr.u("u_Fillp"), 2, (int32_t *) fillp);

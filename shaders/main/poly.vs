@@ -36,7 +36,12 @@ void main() {
     float y = ((a_Pos.y + 1.0) / 2.0) * 200.0;
 
 
-    v_ScreenPos = c_ScreenCoords[int(a_Ordinal)];
+    vec3 screenPos = vec3(c_ScreenCoords[int(a_Ordinal)], 1.0);
+
+    screenPos = u_Camera * screenPos;
+
+    v_ScreenPos = screenPos.xy;
+
 
     vec3 pos = vec3(x, y, 1.0);
 
