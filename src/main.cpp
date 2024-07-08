@@ -166,6 +166,7 @@ int main() {
 
         ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.0, 1.0);
         ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.5, 0.5);
+        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.8, 3);
 
 
         //ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
@@ -191,24 +192,30 @@ int main() {
             cameraScale = constrain(_low, cameraScale, _high);
         }
 
-        /*
         chrono::time_point start = chrono::high_resolution_clock::now();
 
-        for (int i = 0; i < 10000; i++) {
+        //for (int i = 0; i < 10000; i++) {
+        auto getTime = [&]() -> int {
+            chrono::time_point now = chrono::high_resolution_clock::now();
+            return chrono::duration_cast<chrono::milliseconds>(now - start).count();
+        };
+
+
+        int elapsed = 0;
+        int count = 0;
+        static double countAvg = 0;
+        static int frameNo = 1;
+
+        while ((elapsed = getTime()) < 17) {
             ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
+            count++;
         }
 
+        countAvg = ((countAvg * (frameNo - 1)) + (double) count) / ((double) frameNo);
+        cout << count << " triangles in " << elapsed << " ms " << countAvg << " (average)" << endl;
+        frameNo++;
+
         glFinish();
-        chrono::time_point end = chrono::high_resolution_clock::now();
-
-        auto ms = chrono::duration_cast<chrono::milliseconds>(end - start);
-
-
-        cout << "DONE " << ms.count() << endl;
-        */
-
-
-
 
         //angle += 0.4f;
 
