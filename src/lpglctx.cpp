@@ -273,7 +273,7 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
     glBindVertexArray(poly_vao);
 
     //glUniform1fv(poly_pr.u("u_Tri"), 6, coords.data());
-    glUniform1f(poly_pr.u("u_Border"), 2.0f);
+    glUniform1f(poly_pr.u("u_Border"), 18.0f);
 
     GLfloat center[2];
     center[0] = (coords[0] + coords[2] + coords[4]) / 3.0;

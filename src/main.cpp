@@ -209,8 +209,8 @@ int main() {
         static int frameNo = 1;
 
         while ((elapsed = getTime()) < 17) {
-            //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
-            ctx->drawPoly({0.0, 0.0, 0.0, 200.0, 200.0, 200.0}, angle, 1.0, 1.0);
+            ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
+            //ctx->drawPoly({0.0, 0.0, 0.0, 200.0, 200.0, 200.0}, angle, 1.0, 1.0);
             count++;
         }
 

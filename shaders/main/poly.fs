@@ -17,12 +17,15 @@ uniform vec2 b;
 uniform vec2 c;
 
 bool crossTest();
+void texCoords();
 
 in float mx;
 in float my;
 
 in vec2 up;
 in vec2 right;
+
+vec3 tc;
 
 void main() {
     p = vec2(floor(v_Pos.x), floor(v_Pos.y));
@@ -39,6 +42,15 @@ void main() {
 
     if (crossTest()) {
         //o_FragColor = vec4(v_Pos.x / 200.0, 0.0, v_Pos.y / 200.0, 1.0);
+
+        texCoords();
+
+        vec4 c1 = vec4(1.0, 0.0, 0.0, 1.0);
+        vec4 c2 = vec4(0.0, 1.0, 0.0, 1.0);
+        vec4 c3 = vec4(0.0, 0.0, 1.0, 1.0);
+        o_FragColor = tc.x * c1 + tc.y * c2 + tc.z * c3;
+
+
     } else {
         discard;
     }
@@ -101,3 +113,13 @@ bool crossTest() {
     return false;
 }
 
+
+void texCoords() {
+    mat3 coordMat;
+
+    coordMat[0] = vec3(a, 1.0);
+    coordMat[1] = vec3(b, 1.0);
+    coordMat[2] = vec3(c, 1.0);
+
+    tc = inverse(coordMat) * vec3(p, 1.0);
+}
