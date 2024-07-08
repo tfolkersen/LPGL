@@ -41,14 +41,15 @@ void main() {
     }
 
     if (crossTest()) {
-        //o_FragColor = vec4(v_Pos.x / 200.0, 0.0, v_Pos.y / 200.0, 1.0);
-
         texCoords();
 
         vec4 c1 = vec4(1.0, 0.0, 0.0, 1.0);
         vec4 c2 = vec4(0.0, 1.0, 0.0, 1.0);
         vec4 c3 = vec4(0.0, 0.0, 1.0, 1.0);
         o_FragColor = tc.x * c1 + tc.y * c2 + tc.z * c3;
+        //o_FragColor = c1;
+
+
 
 
     } else {
@@ -71,40 +72,65 @@ bool crossTest() {
     float cross3 = ca.x * cp.y - ca.y * cp.x;
 
 
-    if (sign(cross1) == sign(cross2) && sign(cross2) == sign(cross3)) {
+    int signs[3];
+    signs[0] = 0;
+    signs[1] = 0;
+    signs[2] = 0;
+
+
+    signs[int(sign(cross1)) + 1] += 1;
+    signs[int(sign(cross2)) + 1] += 1;
+    signs[int(sign(cross3)) + 1] += 1;
+
+    //if ((sign(cross1) == sign(cross2) && sign(cross2) == sign(cross3)) || (cross1 == 0.0 || cross2 == 0.0 || cross3 == 0.0)) {
+    if (!(signs[0] > 0 && signs[2] > 0)) {
         if (u_Border <= 0.0) {
             return true;
         }
 
         float epsilon = 0.001;
 
+        o_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         vec2 abn = normalize(ab);
         vec2 v1 = ap - dot(abn, ap) * abn;
-        vec2 v1n = normalize(v1);
+        float l1 = length(v1);
+
+        if (l1 < epsilon) {
+            return true;
+        }
+
+        vec2 v1n = v1 / l1;
         float dist1 = length(v1);
         float max1 = mx * abs(dot(v1n, right)) + my * abs(dot(v1n, up));
-        if (dist1 <= max1 + epsilon) {
-            o_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        if (dist1 < max1) {
             return true;
         }
 
+        o_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
         vec2 bcn = normalize(bc);
         vec2 v2 = bp - dot(bcn, bp) * bcn;
-        vec2 v2n = normalize(v2);
+        float l2 = length(v2);
+        if (l2 < epsilon) {
+            return true;
+        }
+        vec2 v2n = v2 / l2;
         float dist2 = length(v2);
         float max2 = mx * abs(dot(v2n, right)) + my * abs(dot(v2n, up));
-        if (dist2 <= max2 + epsilon) {
-            o_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        if (dist2 < max2) {
             return true;
         }
 
+        o_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
         vec2 can = normalize(ca);
         vec2 v3 = cp - dot(can, cp) * can;
-        vec2 v3n = normalize(v3);
+        float l3 = length(v3);
+        if (l3 < epsilon) {
+            return true;
+        }
+        vec2 v3n = v3 / l3;
         float dist3 = length(v3);
         float max3 = mx * abs(dot(v3n, right)) + my * abs(dot(v3n, up));
-        if (dist3 <= max3 + epsilon) {
-            o_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+        if (dist3 < max3) {
             return true;
         }
 
