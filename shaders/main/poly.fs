@@ -1,46 +1,31 @@
 #version 300 es
 precision highp float;
 
-
-uniform float u_Tri[6];
 uniform float u_Border;
 
-uniform float u_ScaleX;
-uniform float u_ScaleY;
-
 uniform vec2 u_Center;
-uniform mat4 u_RotScale;
+uniform mat3 u_RotScale;
 
 in vec2 v_Pos;
 
 out vec4 o_FragColor;
 
-vec2 a, b, c, p;
+vec2 p;
+
+uniform vec2 a;
+uniform vec2 b;
+uniform vec2 c;
 
 bool crossTest();
 
+in float mx;
+in float my;
 
-float mx;
-float my;
-
-vec2 up;
-vec2 right;
+in vec2 up;
+in vec2 right;
 
 void main() {
-    a = vec2(u_Tri[0], u_Tri[1]);
-    b = vec2(u_Tri[2], u_Tri[3]);
-    c = vec2(u_Tri[4], u_Tri[5]);
     p = vec2(floor(v_Pos.x), floor(v_Pos.y));
-
-    a = (u_RotScale * (vec4(a - u_Center, 0.0, 1.0))).xy + u_Center;
-    b = (u_RotScale * (vec4(b - u_Center, 0.0, 1.0))).xy + u_Center;
-    c = (u_RotScale * (vec4(c - u_Center, 0.0, 1.0))).xy + u_Center;
-
-    up = normalize((u_RotScale * vec4(0.0, 1.0, 0.0, 1.0)).xyz).xy;
-    right = normalize((u_RotScale * vec4(1.0, 0.0, 0.0, 1.0)).xyz).xy;
-
-    mx = length((u_RotScale * vec4(1.0, 0.0, 0.0, 1.0)).xyz) * u_Border;
-    my = length((u_RotScale * vec4(0.0, 1.0, 0.0, 1.0)).xyz) * u_Border;
 
     if (length(p) < 6.0) {
         o_FragColor = vec4(1.0, 1.0, 0.0, 1.0);

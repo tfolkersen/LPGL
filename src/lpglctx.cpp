@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_transform_2d.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/trigonometric.hpp>
 #include <iostream>
@@ -215,7 +217,7 @@ void LPGLctx::initGLData() {
     glVertexAttribPointer(poly_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
     glBindVertexArray(0);
 
-    cameraMatrix = glm::identity<glm::mat4>();
+    cameraMatrix = glm::identity<glm::mat3>();
 }
 
 void LPGLctx::freeGLData() {
@@ -270,32 +272,39 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
     glUseProgram(poly_pr.id);
     glBindVertexArray(poly_vao);
 
-    glUniform1fv(poly_pr.u("u_Tri"), 6, coords.data());
+    //glUniform1fv(poly_pr.u("u_Tri"), 6, coords.data());
     glUniform1f(poly_pr.u("u_Border"), 2.0f);
-
-    glUniform1f(poly_pr.u("u_ScaleX"), scalex);
-    glUniform1f(poly_pr.u("u_ScaleY"), scaley);
 
     GLfloat center[2];
     center[0] = (coords[0] + coords[2] + coords[4]) / 3.0;
     center[1] = (coords[1] + coords[3] + coords[5]) / 3.0;
     glUniform2fv(poly_pr.u("u_Center"), 1, &center[0]);
 
-    glm::mat4 u_RotScale = glm::identity<glm::mat4>();
-    u_RotScale = glm::rotate(u_RotScale, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
-    u_RotScale = glm::scale(u_RotScale, glm::vec3(scalex, scaley, 1.0f));
-    glUniformMatrix4fv(poly_pr.u("u_RotScale"), 1, false, &u_RotScale[0][0]);
-
-    glm::mat4 u_Mat1 = glm::identity<glm::mat4>();
-
-    //u_Mat1 = glm::rotate(u_Mat1, (float) glm::radians(5.0), glm::vec3(0.0, 0.0, 1.0));
-    //u_Mat1 = glm::translate(u_Mat1, {-30.0, 0.0, 0.0});
+    glm::mat3 u_RotScale = glm::identity<glm::mat3>();
+    u_RotScale = glm::rotate(u_RotScale, glm::radians(angle));
+    u_RotScale = glm::scale(u_RotScale, glm::vec2(scalex, scaley));
+    glUniformMatrix3fv(poly_pr.u("u_RotScale"), 1, false, &u_RotScale[0][0]);
 
 
+    glUniformMatrix3fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
 
-    glUniformMatrix4fv(poly_pr.u("u_Mat1"), 1, false, &u_Mat1[0][0]);
+    {
+        glm::vec3 a3 = u_RotScale * glm::vec3(coords[0] - center[0], coords[1] - center[1], 1.0);
+        glm::vec3 b3 = u_RotScale * glm::vec3(coords[2] - center[0], coords[3] - center[1], 1.0);
+        glm::vec3 c3 = u_RotScale * glm::vec3(coords[4] - center[0], coords[5] - center[1], 1.0);
 
-    glUniformMatrix4fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
+        a3.x += center[0];
+        a3.y += center[1];
+        b3.x += center[0];
+        b3.y += center[1];
+        c3.x += center[0];
+        c3.y += center[1];
+
+        glUniform2fv(poly_pr.u("a"), 1, &a3[0]);
+        glUniform2fv(poly_pr.u("b"), 1, &b3[0]);
+        glUniform2fv(poly_pr.u("c"), 1, &c3[0]);
+
+    }
 
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -303,13 +312,13 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 }
 
 void LPGLctx::setCamera(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat sy) {
-    cameraMatrix = glm::identity<glm::mat4>();
+    cameraMatrix = glm::identity<glm::mat3>();
 
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec3(x, y, 0.0f));
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec3(100.0f, 100.0f, 0.0f));
-    cameraMatrix = glm::scale(cameraMatrix, glm::vec3(1.0 / sx, 1.0 / sy, 1.0f));
-    cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle), glm::vec3(0.0f, 0.0f, 1.0f));
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec3(-100.0f, -100.0f, 0.0f));
+    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(x, y));
+    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(100.0f, 100.0f));
+    cameraMatrix = glm::scale(cameraMatrix, glm::vec2(1.0 / sx, 1.0 / sy));
+    cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle));
+    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(-100.0f, -100.0f));
 
     //cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle), glm::vec3(0.0f, 0.0f, -1.0f));
     //cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.0f, 0.0f, 0.0f));

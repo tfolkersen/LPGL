@@ -160,6 +160,7 @@ int main() {
         //cameraScale = 0.5;
 
         ctx->setCamera(cx, cy, cameraAngle, sx, sy);
+        /*
         //ctx->setCamera(0.0f, 0.0f, 0.0f, cameraScale, cameraScale);
         //ctx->drawPoly({0.0, 0.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
         //ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.5, 1.5);
@@ -176,6 +177,7 @@ int main() {
         //cin >> cameraAngle;
         ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 0.5, 0.5);
         ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
+        */
 
         //ctx->drawPoly({120, 120, 190, 180, 170, 60}, 0.0, 1.0, 1.0);
         //cout << cameraScale << endl;
@@ -206,8 +208,9 @@ int main() {
         static double countAvg = 0;
         static int frameNo = 1;
 
-        while ((elapsed = getTime()) < 17) {
-            ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
+        while ((elapsed = getTime()) < 1000) {
+            //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
+            ctx->drawPoly({0.0, 0.0, 0.0, 200.0, 200.0, 200.0}, angle, 1.0, 1.0);
             count++;
         }
 
@@ -216,6 +219,16 @@ int main() {
         frameNo++;
 
         glFinish();
+
+        /*
+           ~306k
+
+           ~350k when computing a,b,c before gl
+
+           ~350k+ with more efficient mx/my/up/right
+
+
+           */
 
         //angle += 0.4f;
 

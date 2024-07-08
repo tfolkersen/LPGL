@@ -104,7 +104,7 @@ struct LPGLctx: public GLctx {
 
 
 
-    glm::mat4 cameraMatrix;
+    glm::mat3 cameraMatrix;
     void setCamera(GLfloat x = 0.0f, GLfloat y = 0.0f, GLfloat angle = 0.0f, GLfloat sx = 1.0f, GLfloat sy = 1.0f);
 
     void drawPoly(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
