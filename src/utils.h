@@ -55,3 +55,14 @@ T constrain(const T &low, const T &val, const T &high) {
 
     return val;
 }
+
+template <class T>
+void printBits(T x) {
+    int bits = sizeof(T) * 8;
+
+    for (int shift = bits - 1; shift >= 0; shift--) {
+        std::cout << ((x >> shift) & 1);
+    }
+
+}
+

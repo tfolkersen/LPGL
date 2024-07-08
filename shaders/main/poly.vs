@@ -6,6 +6,7 @@ uniform mat3 u_RotScale;
 uniform float u_Border;
 
 in vec2 a_Pos;
+in float a_Ordinal;
 
 out vec2 v_Pos;
 
@@ -16,11 +17,26 @@ out float my;
 out vec2 up;
 out vec2 right;
 
+#define SCREEN_X 200
+#define SCREEN_Y 200
+
+const vec2 c_ScreenCoords[4] = vec2[4](
+    vec2(0.0, SCREEN_Y),
+    vec2(SCREEN_X, SCREEN_Y),
+    vec2(SCREEN_X, 0.0), 
+    vec2(0.0, 0.0)
+);
+
+out vec2 v_ScreenPos;
+
 void main() {
     gl_Position = vec4(a_Pos.x, a_Pos.y, 0.0, 1.0);
 
     float x = ((a_Pos.x + 1.0) / 2.0) * 200.0;
     float y = ((a_Pos.y + 1.0) / 2.0) * 200.0;
+
+
+    v_ScreenPos = c_ScreenCoords[int(a_Ordinal)];
 
     vec3 pos = vec3(x, y, 1.0);
 

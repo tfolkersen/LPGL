@@ -7,6 +7,10 @@ uniform vec2 u_Center;
 uniform mat3 u_RotScale;
 
 in vec2 v_Pos;
+in vec2 v_ScreenPos;
+
+int screenX, screenY;
+
 
 out vec4 o_FragColor;
 
@@ -16,8 +20,12 @@ uniform vec2 a;
 uniform vec2 b;
 uniform vec2 c;
 
+
+uniform int u_Fillp[2];
+
 bool crossTest();
 void texCoords();
+int negMod(int, int);
 
 in float mx;
 in float my;
@@ -27,8 +35,25 @@ in vec2 right;
 
 vec3 tc;
 
+
 void main() {
     p = vec2(floor(v_Pos.x), floor(v_Pos.y));
+    screenX = int(floor(v_ScreenPos.x));
+    screenY = int(floor(v_ScreenPos.y));
+
+
+
+    int fillBytePos = screenY % 8;
+    int fillByteOrdinal = fillBytePos <= 3 ? 1 : 0;
+    int fillByte = 0xff & (u_Fillp[fillByteOrdinal] >> (8 * (fillBytePos % 4)));
+    int fillBit = 0x1 & (fillByte >> (7 - screenX % 8));
+
+    //o_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    if (fillBit == 1) {
+        o_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+        return;
+    }
+
 
     if (length(p) < 6.0) {
         o_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
@@ -148,4 +173,8 @@ void texCoords() {
     coordMat[2] = vec3(c, 1.0);
 
     tc = inverse(coordMat) * vec3(p, 1.0);
+}
+
+int negMod(int x, int m) {
+    return x >= 0 ? x % m : (x + (-x / m + 1) * m) % m;
 }

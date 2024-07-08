@@ -2,6 +2,7 @@
 #include "glshader.h"
 #include <GLFW/glfw3.h>
 #include <cstdlib>
+#include <cstring>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -173,10 +174,10 @@ void LPGLctx::buildFromParameters(const int w, const int h, const char *windowTi
 
 void LPGLctx::initGLData() {
     const GLfloat fullBox_data[] = {
-        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 2.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 3.0f,
     };
     
     const GLuint boxLike_elems[] = {
@@ -202,8 +203,10 @@ void LPGLctx::initGLData() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
     glEnableVertexAttribArray(tri_pr.a("a_Pos"));
     glEnableVertexAttribArray(tri_pr.a("a_Color"));
-    glVertexAttribPointer(tri_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-    glVertexAttribPointer(tri_pr.a("a_Color"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *) (2 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(tri_pr.a("a_Ordinal"));
+    glVertexAttribPointer(tri_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(tri_pr.a("a_Color"), 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (2 * sizeof(GLfloat)));
+    glVertexAttribPointer(tri_pr.a("a_Ordinal"), 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (5 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
     // drawPoly
@@ -214,10 +217,13 @@ void LPGLctx::initGLData() {
     glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
     glEnableVertexAttribArray(poly_pr.a("a_Pos"));
-    glVertexAttribPointer(poly_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+    glEnableVertexAttribArray(poly_pr.a("a_Ordinal"));
+    glVertexAttribPointer(poly_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(poly_pr.a("a_Ordinal"), 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (5 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
     cameraMatrix = glm::identity<glm::mat3>();
+    memset(fillp, 0xF, sizeof(fillp));
 }
 
 void LPGLctx::freeGLData() {
@@ -288,6 +294,7 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
     glUniformMatrix3fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
 
+
     {
         glm::vec3 a3 = u_RotScale * glm::vec3(coords[0] - center[0], coords[1] - center[1], 1.0);
         glm::vec3 b3 = u_RotScale * glm::vec3(coords[2] - center[0], coords[3] - center[1], 1.0);
@@ -313,6 +320,15 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
     }
 
 
+    //glUniform2ui(poly_pr.u("u_Fillp"), fillp[0], fillp[1]);
+    
+
+    //                              0        1
+
+    setFillp(0x102040810204080);
+
+
+    glUniform1iv(poly_pr.u("u_Fillp"), 2, (int32_t *) fillp);
 
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -331,4 +347,9 @@ void LPGLctx::setCamera(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat
     //cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle), glm::vec3(0.0f, 0.0f, -1.0f));
     //cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
 
+}
+
+void LPGLctx::setFillp(uint64_t val) {
+    fillp[0] = (val >> 32) & 0xFFFFFFFF;
+    fillp[1] = val & 0xFFFFFFFF;
 }
