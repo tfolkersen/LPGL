@@ -3,10 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 #include <cstdlib>
+#include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 #include <chrono>
 #include <functional>
 #include "utils.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 extern "C" {
 #include <lua.h>
@@ -19,6 +23,7 @@ extern "C" {
 #endif
 
 using namespace std;
+using glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4, glm::rotate, glm::scale, glm::translate, glm::radians;
 
 float randf() {
     return ((float) rand()) / ((float) RAND_MAX);
@@ -90,6 +95,19 @@ int main() {
     float cd = 3.0;
 
 
+    float fpx = 0.0;
+    float fpy = 0.0;
+    float dfpx = 0.08;
+    float dfpy = 0.08;
+
+    float fpa = 0.0;
+    float dfpa = 0.5;
+
+
+    float fpScale = 1.0;
+    float dfpScale = 0.1;
+
+
     float cameraAngle = 0.0f;
     float cameraAngleDelta = 0.5f;
     cameraAngleDelta = 2.0f;
@@ -142,6 +160,16 @@ int main() {
             sx -= sd;
             sy -= sd;
         }
+
+
+        if (glfwGetKey(ctx->window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
+            fpScale += dfpScale;
+        }
+
+        if (glfwGetKey(ctx->window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
+            fpScale -= dfpScale;
+        }
+
 
         /*
         ctx->setCamera();
@@ -239,10 +267,16 @@ int main() {
 
 
 
+
         ctx->anim();
 
 
+
         ctx->setCamera(cx, cy, cameraAngle, sx, sy);
+
+        //ctx->setfpt(fpx, fpy, fpa, fpScale, fpScale);
+        ctx->fpt = scale(glm::identity<mat3>(), vec2(1.0 / fpScale, 1.0 / fpScale));
+
         while ((elapsed = getTime()) < 1000 / 30) {
             //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
             //ctx->drawPoly({}, angle, 1.0, 1.0);

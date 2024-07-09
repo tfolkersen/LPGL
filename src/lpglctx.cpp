@@ -16,6 +16,7 @@
 #include <glm/ext.hpp>
 
 using namespace std;
+using glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4, glm::rotate, glm::scale, glm::translate, glm::radians;
 
 bool LPGLctx::exitHandled = false;
 
@@ -399,7 +400,6 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
 
 
-using glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4, glm::rotate, glm::scale, glm::translate, glm::radians;
 
 void LPGLctx::setCamera(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat sy) {
     glm::mat3 ident = glm::identity<glm::mat3>();
@@ -416,6 +416,22 @@ void LPGLctx::setCamera(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat
 
 
  }
+
+void LPGLctx::setfpt(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat sy) {
+    glm::mat3 ident = glm::identity<glm::mat3>();
+    fpt = ident;
+
+    vec3 motion = vec3(x, y, 1.0);
+    motion = rotate(ident, radians(angle)) * motion;
+    motion = scale(ident, vec2(sx, sy)) * motion;
+
+    fpt = translate(fpt, vec2(100.0 + x, 100.0 + y));
+    fpt = scale(fpt, vec2(1.0 / sx, 1.0 / sy));
+    fpt = rotate(fpt, radians(-angle));
+    fpt = translate(fpt, vec2(-100.0, -100.0));
+ }
+
+
 
 
 void LPGLctx::drawTest(const vector<GLfloat> &_coords, float angle, float scalex, float scaley) {
@@ -467,6 +483,10 @@ void LPGLctx::drawTest(const vector<GLfloat> &_coords, float angle, float scalex
 
 
     glUniform1iv(test_pr.u("u_Fillp"), 2, (int32_t *) fillp);
+
+
+    glUniformMatrix3fv(test_pr.u("fillpTransform"), 1, false, &fpt[0][0]);
+
 
 
 

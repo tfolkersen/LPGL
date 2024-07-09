@@ -112,6 +112,7 @@ struct LPGLctx: public GLctx {
     void setFillp(uint64_t val);
 
     void setCamera(GLfloat x = 0.0f, GLfloat y = 0.0f, GLfloat angle = 0.0f, GLfloat sx = 1.0f, GLfloat sy = 1.0f);
+    void setfpt(GLfloat x = 0.0f, GLfloat y = 0.0f, GLfloat angle = 0.0f, GLfloat sx = 1.0f, GLfloat sy = 1.0f);
 
     void drawPoly(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
 
@@ -122,6 +123,7 @@ struct LPGLctx: public GLctx {
 
     glm::mat3 model;
     glm::mat3 camera;
+    glm::mat3 fpt;
 
 };
 
