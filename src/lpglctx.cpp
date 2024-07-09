@@ -222,8 +222,28 @@ void LPGLctx::initGLData() {
     glVertexAttribPointer(poly_pr.a("a_Ordinal"), 1, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (5 * sizeof(GLfloat)));
     glBindVertexArray(0);
 
-    cameraMatrix = glm::identity<glm::mat3>();
+    //cameraMatrix = glm::identity<glm::mat3>();
+
+    model = glm::identity<glm::mat3>();
+    camera = glm::identity<glm::mat3>();
+
     memset(fillp, 0xF, sizeof(fillp));
+
+    test_pr = GLprogram::fromFiles("shaders/main/test.vs", "shaders/main/test.fs");
+    test_vao = newGlVertexArray();
+
+    glBindVertexArray(test_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
+    glEnableVertexAttribArray(test_pr.a("a_Pos"));
+    glEnableVertexAttribArray(test_pr.a("a_Color"));
+    glVertexAttribPointer(test_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(test_pr.a("a_Color"), 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (2 * sizeof(GLfloat)));
+    glBindVertexArray(0);
+
+
+    //drawTest
+
 }
 
 void LPGLctx::freeGLData() {
@@ -301,7 +321,7 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
 
 
-    glUniformMatrix3fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
+    //glUniformMatrix3fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
 
 
     {
@@ -347,21 +367,128 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
 }
 
+   /*
+    glm::vec3 motion = glm::vec3(x, y, 1.0);
+    motion = glm::rotate(ident, glm::radians(-angle)) * motion;
+    
+    camera = glm::identity<glm::mat3>();
+
+    camera = glm::translate(camera, glm::vec2(100.0 + x, 100.0 + y));
+    camera = glm::translate(camera, glm::vec2(x, y));
+    camera = glm::scale(camera, glm::vec2(1.0 / sx, 1.0 / sy));
+    camera = glm::rotate(camera, glm::radians(-angle));
+
+
+
+    glm::vec3 rev3 = glm::vec3(-x, -y, 1.0);
+    rev3 = glm::scale(ident, glm::vec2(sx, sy)) * glm::rotate(ident, glm::radians(angle)) * rev3;
+    glm::vec2 rev2;
+    rev2.x = rev3.x;
+    rev2.y = rev3.y;
+
+    camera = glm::translate(camera, rev2);
+
+    camera = glm::translate(camera, glm::vec2(motion.x, motion.y));
+    
+    camera = glm::translate(camera, glm::vec2(-100.0 - x, -100.0 - y));
+*/
+
+
+
+
+
+
+
+using glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4, glm::rotate, glm::scale, glm::translate, glm::radians;
+
 void LPGLctx::setCamera(GLfloat x, GLfloat y, GLfloat angle, GLfloat sx, GLfloat sy) {
-    cameraMatrix = glm::identity<glm::mat3>();
+    glm::mat3 ident = glm::identity<glm::mat3>();
+    camera = ident;
 
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(x, y));
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(100.0f, 100.0f));
-    cameraMatrix = glm::scale(cameraMatrix, glm::vec2(1.0 / sx, 1.0 / sy));
-    cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle));
-    cameraMatrix = glm::translate(cameraMatrix, glm::vec2(-100.0f, -100.0f));
+    vec3 motion = vec3(x, y, 1.0);
+    motion = rotate(ident, radians(angle)) * motion;
+    motion = scale(ident, vec2(sx, sy)) * motion;
 
-    //cameraMatrix = glm::rotate(cameraMatrix, glm::radians(-angle), glm::vec3(0.0f, 0.0f, -1.0f));
-    //cameraMatrix = glm::translate(cameraMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+    camera = translate(camera, vec2(100.0 + x, 100.0 + y));
+    camera = scale(camera, vec2(1.0 / sx, 1.0 / sy));
+    camera = rotate(camera, radians(-angle));
+    camera = translate(camera, vec2(-100.0, -100.0));
 
+
+ }
+
+
+void LPGLctx::drawTest(const vector<GLfloat> &_coords, float angle, float scalex, float scaley) {
+    vector<GLfloat> coords = _coords;
+
+    glViewport(0, 0, 200, 200);
+    glUseProgram(test_pr.id);
+    glBindVertexArray(test_vao);
+
+    float u_Border = 2.0;
+    glUniform1f(test_pr.u("u_Border"), u_Border);
+    
+
+
+    if (coords.size() < 2) {
+        cerr << "drawTest needs 2 coordinates, got " << coords.size() << endl;
+    }
+
+    int u_DrawCirc = 0;
+    if (coords.size() == 2) {
+        u_DrawCirc = 1;
+        coords.push_back(0.0);
+        coords.push_back(0.0);
+        coords.push_back(0.0);
+        coords.push_back(0.0);
+    }
+
+    glUniform1i(test_pr.u("u_DrawCirc"), u_DrawCirc);
+
+    glUniform2fv(test_pr.u("a"), 1, coords.data());
+    glUniform2fv(test_pr.u("b"), 1, coords.data() + 2);
+    glUniform2fv(test_pr.u("c"), 1, coords.data() + 4);
+
+    glm::vec2 center;
+    center.x = (coords[0] + coords[2] + coords[4]) / 3.0f;
+    center.y = (coords[1] + coords[3] + coords[5]) / 3.0f;
+
+    glUniform2fv(test_pr.u("u_Center"), 1, &center[0]);
+
+
+    model = glm::identity<glm::mat3>();
+    model = glm::translate(model, center);
+    model = glm::scale(model, glm::vec2(1.0 / scalex, 1.0 / scaley));
+    model = glm::rotate(model, glm::radians(-angle));
+    model = glm::translate(model, -center);
+
+    glUniformMatrix3fv(test_pr.u("model"), 1, false, &model[0][0]);
+    glUniformMatrix3fv(test_pr.u("camera"), 1, false, &camera[0][0]);
+
+
+    glUniform1iv(test_pr.u("u_Fillp"), 2, (int32_t *) fillp);
+
+
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
+
+
 
 void LPGLctx::setFillp(uint64_t val) {
     fillp[0] = (val >> 32) & 0xFFFFFFFF;
     fillp[1] = val & 0xFFFFFFFF;
+}
+
+
+
+void LPGLctx::anim() {
+    const float dda = 1.0;
+    static float ang = -dda;
+
+    ang += dda;
+   
+    
+
+
 }

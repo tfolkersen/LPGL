@@ -160,7 +160,7 @@ int main() {
         //cin >> cameraScale; //Use 0.2
         //cameraScale = 0.5;
 
-        ctx->setCamera(cx, cy, cameraAngle, sx, sy);
+        //ctx->setCamera(cx, cy, cameraAngle, sx, sy);
         /*
         //ctx->setCamera(0.0f, 0.0f, 0.0f, cameraScale, cameraScale);
         //ctx->drawPoly({0.0, 0.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
@@ -224,7 +224,11 @@ int main() {
         //cout << bit << endl;
 
         static float dx = 0.0;
-        const float ddx = 0.1;
+        //const float ddx = 4.1;
+        const float ddx = 4.1;
+
+
+
         if (glfwGetKey(ctx->window, GLFW_KEY_KP_4) == GLFW_PRESS) {
             dx -= ddx;
         }
@@ -235,6 +239,10 @@ int main() {
 
 
 
+        ctx->anim();
+
+
+        ctx->setCamera(cx, cy, cameraAngle, sx, sy);
         while ((elapsed = getTime()) < 1000 / 30) {
             //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
             //ctx->drawPoly({}, angle, 1.0, 1.0);
@@ -244,7 +252,6 @@ int main() {
 
             float dy = 0.0;
 
-            cout << dx << endl;
 
             //dx = cos((frameNo % 120) / 120.0 * 3.141592654) * 60.0;
 
@@ -252,9 +259,24 @@ int main() {
 
 
 
-            ctx->drawPoly({dx + 0.0, 0.0, dx + 0.0, 199.0, dx + 199.0, 199.0}, angle, 1.0, 1.0);
+            //ctx->drawPoly({dx + 0.0, 0.0, dx + 0.0, 199.0, dx + 199.0, 199.0}, angle, 1.0, 1.0);
             //ctx->drawPoly({dx + 0.0, 0.0, dx + 0.0, 199.0, dx + 199.0, 199.0}, angle, 4.0, 4.0);
             //ctx->drawPoly({0.0, 50.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
+
+            //ctx->drawTest({3.0, 3.0}, angle, 1.0, 1.0);
+            //ctx->drawTest({199.0, 199.0}, angle, 1.0, 1.0);
+
+
+            //ctx->drawTest({50.0, 50.0, 50.0, 100.0, 100.0, 50.0}, angle, 5.0, 5.0);
+            //ctx->drawTest({0.0, 0.0, 0.0, 100.0, 100.0, 0.0}, angle, 2.0, 2.0);
+            //ctx->drawTest({50.0, 50.0, 50.0, 100.0, 100.0, 50.0}, 180,8 2.0, 2.0);
+            //dx = angle * 10.0;
+            //ctx->drawTest({50.0 + dx, 50.0, 50.0 + dx, 100.0, 100.0 + dx, 50.0}, angle, 6.0, 6.0);
+            //ctx->drawTest({}, 0.0, 1.0, 1.0);
+
+
+            ctx->drawTest({0.0 + dx, 0.0, 0.0 + dx, 100.0, 100.0 + dx, 0.0}, angle, 1.0, 1.0);
+            //ctx->drawTest({0.0, 0.0}, 0, 1.0, 1.0);
         }
 
         minCount = min(minCount, (unsigned int) count);

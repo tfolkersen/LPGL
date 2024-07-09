@@ -52,10 +52,12 @@ struct LPGLctx: public GLctx {
     // VAOs
     GLuint tri_vao;
     GLuint poly_vao;
+    GLuint test_vao;
 
     // Programs
     GLprogram tri_pr;
     GLprogram poly_pr;
+    GLprogram test_pr;
 
     static bool exitHandled;
 
@@ -104,7 +106,7 @@ struct LPGLctx: public GLctx {
 
 
 
-    glm::mat3 cameraMatrix;
+    //glm::mat3 cameraMatrix;
     uint32_t fillp[2];
 
     void setFillp(uint64_t val);
@@ -113,7 +115,15 @@ struct LPGLctx: public GLctx {
 
     void drawPoly(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
 
+    void drawTest(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
+
+    void anim();
+
+
+    glm::mat3 model;
+    glm::mat3 camera;
 
 };
+
 
 typedef std::unique_ptr<LPGLctx> LPGLctxptr;
