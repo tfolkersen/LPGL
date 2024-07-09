@@ -4,6 +4,8 @@ precision highp float;
 uniform float u_Border;
 
 uniform vec2 u_Center;
+uniform vec2 u_NewCenter;
+
 uniform mat3 u_RotScale;
 
 in vec2 v_Pos;
@@ -38,9 +40,14 @@ vec3 tc;
 
 void main() {
     p = vec2(floor(v_Pos.x), floor(v_Pos.y));
+
     screenX = int(floor(v_ScreenPos.x));
     screenY = int(floor(v_ScreenPos.y));
 
+
+    // FILLP DRAWCALL SPACE
+    //screenX = int(floor(v_Pos.x - u_NewCenter.x));
+    //screenY = int(floor(v_Pos.y - u_NewCenter.y));
 
 
     int fillBytePos = screenY % 8;
@@ -60,8 +67,8 @@ void main() {
         return;
     }
 
-    if (length(p - u_Center) < 6.0) {
-        o_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    if (length(p - u_NewCenter) < 6.0) {
+        o_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         return;
     }
 
@@ -78,7 +85,7 @@ void main() {
 
 
     } else {
-        discard;
+        //discard;
     }
 }
 

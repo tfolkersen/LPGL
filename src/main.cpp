@@ -1,6 +1,7 @@
 #include "lpglctx.h"
 #include "glstuff.h"
 #include <GLFW/glfw3.h>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
@@ -210,6 +211,30 @@ int main() {
         static double countAvg = 0;
         static int frameNo = 1;
 
+        static int bit = 0;
+
+        if (frameNo % 4 == 0) {
+            bit = (bit + 1) % 64;
+        }
+
+        ctx->setFillp(((uint64_t) -1) >> (63 - bit));
+        ctx->setFillp(0x0000000000042f2);
+
+
+        //cout << bit << endl;
+
+        static float dx = 0.0;
+        const float ddx = 0.1;
+        if (glfwGetKey(ctx->window, GLFW_KEY_KP_4) == GLFW_PRESS) {
+            dx -= ddx;
+        }
+
+        if (glfwGetKey(ctx->window, GLFW_KEY_KP_6) == GLFW_PRESS) {
+            dx += ddx;
+        }
+
+
+
         while ((elapsed = getTime()) < 1000 / 30) {
             //ctx->drawPoly({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f}, angle, 1.0, 1.0);
             //ctx->drawPoly({}, angle, 1.0, 1.0);
@@ -217,7 +242,18 @@ int main() {
             count++;
 
 
-            ctx->drawPoly({0.0, 0.0, 0.0, 199.0, 199.0, 199.0}, angle, 1.0, 1.0);
+            float dy = 0.0;
+
+            cout << dx << endl;
+
+            //dx = cos((frameNo % 120) / 120.0 * 3.141592654) * 60.0;
+
+            //cout << dx << endl;
+
+
+
+            ctx->drawPoly({dx + 0.0, 0.0, dx + 0.0, 199.0, dx + 199.0, 199.0}, angle, 1.0, 1.0);
+            //ctx->drawPoly({dx + 0.0, 0.0, dx + 0.0, 199.0, dx + 199.0, 199.0}, angle, 4.0, 4.0);
             //ctx->drawPoly({0.0, 50.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
         }
 

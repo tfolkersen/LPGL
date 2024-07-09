@@ -292,6 +292,15 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
     glUniformMatrix3fv(poly_pr.u("u_RotScale"), 1, false, &u_RotScale[0][0]);
 
 
+    glm::mat3 u_Rot = glm::rotate(glm::identity<glm::mat3>(), glm::radians(angle));
+    glUniformMatrix3fv(poly_pr.u("u_Rot"), 1, false, &u_Rot[0][0]);
+    glm::mat3 u_Scale = glm::scale(glm::identity<glm::mat3>(), glm::vec2(scalex, scaley));
+    glUniformMatrix3fv(poly_pr.u("u_Scale"), 1, false, &u_Scale[0][0]);
+
+
+
+
+
     glUniformMatrix3fv(poly_pr.u("u_Camera"), 1, false, &cameraMatrix[0][0]);
 
 
@@ -316,6 +325,10 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
         //cout << c3 << endl;
         //cout << endl;
 
+        GLfloat newCenter[2];
+        newCenter[0] = (a3.x + b3.x + c3.x) / 3.0;
+        newCenter[1] = (a3.y + b3.y + c3.y) / 3.0;
+        glUniform2fv(poly_pr.u("u_NewCenter"), 1, &newCenter[0]);
 
     }
 
@@ -325,9 +338,6 @@ void LPGLctx::drawPoly(const vector<GLfloat> &coords, float angle, float scalex,
 
     //                              0        1
 
-    setFillp(0x102040810204080);
-    setFillp(0x0);
-    setFillp(0x0000000000042f2);
 
 
     glUniform1iv(poly_pr.u("u_Fillp"), 2, (int32_t *) fillp);

@@ -4,6 +4,10 @@ precision highp float;
 uniform mat3 u_Camera;
 uniform mat3 u_RotScale;
 uniform float u_Border;
+uniform vec2 u_NewCenter;
+
+uniform mat3 u_Rot;
+uniform mat3 u_Scale;
 
 in vec2 a_Pos;
 in float a_Ordinal;
@@ -37,8 +41,23 @@ void main() {
 
 
     vec3 screenPos = vec3(c_ScreenCoords[int(a_Ordinal)], 1.0);
+    screenPos = vec3(x, y, 1.0);
 
+    // SCREEN SPACE
+    //screenPos = screenPos;
+
+    // WORLD SPACE
     screenPos = u_Camera * screenPos;
+
+    // LOCAL/DRAWCALL SPACE
+    vec3 offset = vec3(u_NewCenter.x, u_NewCenter.y, 0.0);
+    vec3 camOffset = vec3(100.0, 100.0, 0.0);
+    //screenPos = ((u_Scale * offset) + (inverse(u_Rot) * u_Scale * (u_Camera * screenPos - offset))) - offset;
+    //screenPos = u_Camera * screenPos;
+
+
+
+
 
     v_ScreenPos = screenPos.xy;
 
