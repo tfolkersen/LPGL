@@ -275,7 +275,7 @@ int main() {
             //ctx->drawTest({}, 0.0, 1.0, 1.0);
 
 
-            ctx->drawTest({0.0 + dx, 0.0, 0.0 + dx, 100.0, 100.0 + dx, 0.0}, angle, 1.0, 1.0);
+            ctx->drawTest({0.0f + dx, 0.0f, 0.0f + dx, 100.0f, 100.0f + dx, 0.0f}, angle, 1.0, 1.0);
             //ctx->drawTest({0.0, 0.0}, 0, 1.0, 1.0);
         }
 
