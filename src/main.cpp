@@ -1,3 +1,25 @@
+/*
+
+b(f) t(c)
+
+drawTri()
+    !coords: float[6]
+
+    color: float<1, 2, 3, 4>
+        1: palette
+        2: palette, alpha
+        3: RGB
+        4: RGBA
+    texCoords: float[6]
+
+    borderWidth: float
+
+    !angle: float (degrees)
+
+    !scalex, scaley: float
+
+*/
+
 #include "lpglctx.h"
 #include "glstuff.h"
 #include <GLFW/glfw3.h>
