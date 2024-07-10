@@ -85,31 +85,6 @@ int main() {
 
     glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
 
-    /*
-    _mainLoop = [&]() {
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        chrono::time_point start = chrono::high_resolution_clock::now();
-
-        ctx->drawTri({300.0f, 300.0f, 600.0f, 375.0f, 600.0f, 600.0f});
-        ctx->drawTri({50.0f, 50.0f, 700.0f, 50.0f, 350.0, 300.0f});
-
-        for (int i = 0; i < 10000; i++) {
-            ctx->drawTri({randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f, randf() * 200.0f});
-        }
-
-        glFinish();
-        chrono::time_point end = chrono::high_resolution_clock::now();
-
-        auto ms = chrono::duration_cast<chrono::milliseconds>(end - start);
-
-
-        //cout << "DONE " << ms.count() << endl;
-
-        glfwSwapBuffers(ctx->window);
-        glfwPollEvents();
-    };
-    */
 
 
     float angle = 0.0f;
@@ -200,46 +175,6 @@ int main() {
         }
 
 
-        /*
-        ctx->setCamera();
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.0, 1.0);
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.5, 1.5);
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.5, 1.5);
-
-        ctx->drawPoly({120, 120, 190, 180, 170, 60}, 0.0, 1.0, 1.0);
-        ctx->drawPoly({120, 120, 190, 180, 170, 60}, 0.0, 1.0, 1.0);
-*/
-        //ctx->setCamera(0.0f, 0.0f, cameraAngle, cameraScale, cameraScale);
-
-
-        //cin >> cameraScale;
-
-        //cin >> cameraScale; //Use 0.2
-        //cameraScale = 0.5;
-
-        //ctx->setCamera(cx, cy, cameraAngle, sx, sy);
-        /*
-        //ctx->setCamera(0.0f, 0.0f, 0.0f, cameraScale, cameraScale);
-        //ctx->drawPoly({0.0, 0.0, 0.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
-        //ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.5, 1.5);
-
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 1.0, 1.0);
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.5, 0.5);
-        ctx->drawPoly({0.0, 0.0, 0.0, 100.0, 100.0, 100.0}, angle, 0.8, 3);
-
-
-        //ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
-
-        //cameraAngle = 90.0;
-
-        //cin >> cameraAngle;
-        ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 0.5, 0.5);
-        ctx->drawPoly({50.0, 50.0, 50.0, 150.0, 150.0, 150.0}, angle, 1.0, 1.0);
-        */
-
-        //ctx->drawPoly({120, 120, 190, 180, 170, 60}, 0.0, 1.0, 1.0);
-        //cout << cameraScale << endl;
-
         static GLfloat cameraScaleDelta = 0.02f;
         cameraScale += cameraScaleDelta;
 
@@ -306,6 +241,7 @@ int main() {
         //ctx->setfpt(fpx, fpy, fpa, fpScale, fpScale);
         ctx->fpt = scale(glm::identity<mat3>(), vec2(1.0 / fpScale, 1.0 / fpScale));
 
+        /*
         while ((elapsed = getTime()) < 1000 / 30) {
             count++;
 
@@ -324,8 +260,18 @@ int main() {
         countAvg = ((countAvg * (frameNo - 1)) + (double) count) / ((double) frameNo);
         cout << count << " triangles in " << elapsed << " ms " << countAvg << " (average) " << minCount << " (min) "<< endl;
         frameNo++;
+        */
 
-        glFinish();
+        //glFinish();
+
+        //////////////////////// DO DRAWING HERE
+
+
+
+        ctx->drawSimple({0.0, 0.0, 0.0, 100.0, 100.0, 0.0});
+
+        while ((elapsed = getTime()) < 1000 / 30) {
+        }
 
         /*
            ~306k

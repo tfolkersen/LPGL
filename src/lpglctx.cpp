@@ -17,6 +17,8 @@
 
 using namespace std;
 using glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4, glm::rotate, glm::scale, glm::translate, glm::radians;
+using glm::identity;
+
 
 bool LPGLctx::exitHandled = false;
 
@@ -186,15 +188,27 @@ void LPGLctx::initGLData() {
         2, 3, 0,
     };
 
+    const GLuint triLike_elems[] = {
+        0, 1, 2,
+    };
+
     fullBox_vbuff = newGlBuffer();
     glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
     glBufferData(GL_ARRAY_BUFFER, sizeof(fullBox_data), fullBox_data, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    stream_vbuff = newGlBuffer();
+
     boxLike_ebuff = newGlBuffer();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(boxLike_elems), boxLike_elems, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    triLike_ebuff = newGlBuffer();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triLike_ebuff);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triLike_elems), triLike_elems, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
     tri_pr = GLprogram::fromFiles("shaders/main/tri.vs", "shaders/main/tri.fs");
 
@@ -244,6 +258,17 @@ void LPGLctx::initGLData() {
 
 
     //drawTest
+
+    //drawSimple
+    cam4 = glm::identity<mat4>();
+    mod4 = glm::identity<mat4>();
+    sim_pr = GLprogram::fromFiles("shaders/main/simple.vs", "shaders/main/simple.fs");
+
+    sim_vao = newGlVertexArray();
+    glBindVertexArray(sim_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, stream_vbuff);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triLike_ebuff);
+    glBindVertexArray(0);
 
 }
 
@@ -507,8 +532,32 @@ void LPGLctx::anim() {
     static float ang = -dda;
 
     ang += dda;
-   
-    
+}
+
+
+void LPGLctx::drawSimple(std::vector<GLfloat> coords) {
+    glUseProgram(sim_pr.id);
+    glBindVertexArray(sim_vao);
+
+    GLfloat data[] = {
+        0.0, 0.0,
+        0.0, 100.0,
+        100.0, 0.0,
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STREAM_DRAW);
+    glEnableVertexAttribArray(sim_pr.a("a_Pos"));
+    glVertexAttribPointer(sim_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+
+
+    mod4 = identity<mat4>();
+    mod4 = translate(mod4, vec3(1.0, 0.0, 0.0));
+
+
+
+    glUniformMatrix4fv(sim_pr.u("model"), 1, false, &mod4[0][0]);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+
 
 
 }

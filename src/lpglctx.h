@@ -42,10 +42,14 @@ struct LPGLctx: public GLctx {
     LPGLctxEnum status;
     std::string statusLog;
 
-  private:
+  //private:
+  public:
     // Buffers
     GLuint fullBox_vbuff;
+    GLuint stream_vbuff;
     GLuint boxLike_ebuff;
+    GLuint triLike_ebuff;
+
     std::unordered_set<GLuint> glBuffers;
     std::unordered_set<GLuint> glVertexArrays;
     
@@ -118,12 +122,20 @@ struct LPGLctx: public GLctx {
 
     void drawTest(const std::vector<GLfloat> &coords, float angle, float scalex, float scaley);
 
+    void drawSimple(std::vector<GLfloat> coords);
+
     void anim();
 
 
     glm::mat3 model;
     glm::mat3 camera;
     glm::mat3 fpt;
+
+    // drawSimple
+    glm::mat4 mod4;
+    glm::mat4 cam4;
+    GLprogram sim_pr;
+    GLuint sim_vao;
 
 };
 
