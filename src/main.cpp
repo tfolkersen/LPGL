@@ -2,6 +2,13 @@
 
 b(f) t(c)
 
+
+_
+tb
+bt
+b
+t
+
 drawTri()
     !coords: float[6]
 
