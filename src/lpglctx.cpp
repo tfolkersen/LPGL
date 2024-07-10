@@ -1,5 +1,6 @@
 #include "lpglctx.h"
 #include "glshader.h"
+#include "gltexture.h"
 #include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <cstring>
@@ -270,6 +271,20 @@ void LPGLctx::initGLData() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triLike_ebuff);
     glBindVertexArray(0);
 
+    //drawfb
+    fb_pr = GLprogram::fromFiles("shaders/main/fb.vs", "shaders/main/fb.fs");
+
+    fb_vao = newGlVertexArray();
+    glBindVertexArray(fb_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, fullBox_vbuff);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, boxLike_ebuff);
+    glEnableVertexAttribArray(fb_pr.a("a_Pos"));
+    glVertexAttribPointer(fb_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    glBindVertexArray(0);
+
+
+
+
 }
 
 void LPGLctx::freeGLData() {
@@ -534,30 +549,78 @@ void LPGLctx::anim() {
     ang += dda;
 }
 
+void LPGLctx::drawTex(const GLtexture &tex) {
+    glUseProgram(fb_pr.id);
+
+    glBindVertexArray(fb_vao);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex.id);
+
+    glUniform1i(fb_pr.u("tex0"), 0);
+    glUniform1f(fb_pr.u("width"), tex.w);
+    glUniform1f(fb_pr.u("height"), tex.h);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
 
 void LPGLctx::drawSimple(std::vector<GLfloat> coords) {
+    GLfloat center[2];
+
     glUseProgram(sim_pr.id);
     glBindVertexArray(sim_vao);
 
     GLfloat data[] = {
         0.0, 0.0,
-        0.0, 100.0,
-        100.0, 0.0,
+        199.0, 199.0,
+        199.0, 0.0
     };
 
+    glBindBuffer(GL_ARRAY_BUFFER, stream_vbuff);
     glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STREAM_DRAW);
     glEnableVertexAttribArray(sim_pr.a("a_Pos"));
     glVertexAttribPointer(sim_pr.a("a_Pos"), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 
 
+
+    const float dangle = 1.0;
+    static float angle = -dangle;
+    angle += dangle;
+
+
+    const float ddx = 0.3;
+    static float dx = -ddx;
+    dx += ddx;
+
+    const float ddy = 0.15;
+    static float dy = -ddy;
+    dy += ddy;
+
+
     mod4 = identity<mat4>();
-    mod4 = translate(mod4, vec3(1.0, 0.0, 0.0));
+    mod4 = translate(mod4, vec3(dx, dy, 0.0));
+    mod4 = translate(mod4, vec3(33.333, 33.333, 0.0));
+    mod4 = rotate(mod4, glm::radians(angle), vec3(0.0, 0.0, 1.0));
+    mod4 = translate(mod4, vec3(-33.333, -33.333, 0.0));
+
+    mod4 = identity<mat4>();
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glLineWidth(2.0);
+    //glDisable(GL_BLEND);
+
+
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(data) / (2 * sizeof(GLfloat)));
 
 
 
     glUniformMatrix4fv(sim_pr.u("model"), 1, false, &mod4[0][0]);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_BLEND);
 
 
 }
+

@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include "glstuff.h"
+#include "gltexture.h"
 
 enum LPGLctxEnum {
     LPGLCTX_ERROR = -1,
@@ -57,11 +58,13 @@ struct LPGLctx: public GLctx {
     GLuint tri_vao;
     GLuint poly_vao;
     GLuint test_vao;
+    GLuint fb_vao;
 
     // Programs
     GLprogram tri_pr;
     GLprogram poly_pr;
     GLprogram test_pr;
+    GLprogram fb_pr;
 
     static bool exitHandled;
 
@@ -125,6 +128,9 @@ struct LPGLctx: public GLctx {
     void drawSimple(std::vector<GLfloat> coords);
 
     void anim();
+
+
+    void drawTex(const GLtexture &tex);
 
 
     glm::mat3 model;

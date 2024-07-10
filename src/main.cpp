@@ -27,6 +27,7 @@ drawTri()
 
 */
 
+#include "gltexture.h"
 #include "lpglctx.h"
 #include "glstuff.h"
 #include <GLFW/glfw3.h>
@@ -117,6 +118,12 @@ int main() {
     cameraAngleDelta = 2.0f;
 
     float cameraScale = 1.0f;
+
+    GLframebuffer fb;
+    GLtexture fbtex = GLtexture::fromDimensions(200, 200);
+    fb.attachColor(fbtex);
+
+    cout << "Framebuffer status: " << fb.complete() << endl;
 
     _mainLoop = [&]() {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -268,7 +275,16 @@ int main() {
 
 
 
+        glViewport(0, 0, 200, 200);
+
+
+        //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.id);
+        glClear(GL_COLOR_BUFFER_BIT);
         ctx->drawSimple({0.0, 0.0, 0.0, 100.0, 100.0, 0.0});
+
+
+        //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        //ctx->drawTex(fbtex);
 
         while ((elapsed = getTime()) < 1000 / 30) {
         }
