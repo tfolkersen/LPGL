@@ -41,6 +41,9 @@ void main() {
     float keepY = floor(fracY / snapY) * snapY;
     p.y = floor(v_p.y) + keepY;
 
+    p.x = floor(v_p.x);
+    p.y = floor(v_p.y);
+
 
     screenX = int(floor(v_sp.x));
     screenY = int(floor(v_sp.y));

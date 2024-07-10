@@ -29,13 +29,7 @@ void main() {
     //v_sp = fill3.xy;
 
     // FILLP WORLD SPACE
-    //fill3 = (fillpTransform * camera * fill3);
-    //v_sp = fill3.xy;
-
-    // FILLP DRAWCALL SPACE
-    //fill3 = (model * camera * fill3);
-    //v_sp = fill3.xy + u_Center;
-    fill3 = (fillpTransform * (vec3(u_Center, 0.0) + model * camera * fill3));
+    fill3 = (fillpTransform * camera * fill3);
     v_sp = fill3.xy;
 
     vec3 pos = vec3(x, y, 1.0);

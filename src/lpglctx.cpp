@@ -441,7 +441,7 @@ void LPGLctx::drawTest(const vector<GLfloat> &_coords, float angle, float scalex
     glUseProgram(test_pr.id);
     glBindVertexArray(test_vao);
 
-    float u_Border = 2.0;
+    float u_Border = 1.0;
     glUniform1f(test_pr.u("u_Border"), u_Border);
     
 
